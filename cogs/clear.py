@@ -47,7 +47,7 @@ class clear(commands.Cog):
             await ctx.send(embed=embed)
 
     @until_subcommand.error
-    async def until_subcommand(self, ctx, error):
+    async def until_subcommand_error(self, ctx, error):
         if isinstance(error, commands.MissingRequiredArgument):
             embed = discord.Embed(title="", colour=discord.Colour.red())
             embed.add_field(name="Quanti messaggi devo cancellare?", value='```Esempio:\ncancella 10\ncancella fino ID_DEL_MESSAGGIO```', inline=False)
