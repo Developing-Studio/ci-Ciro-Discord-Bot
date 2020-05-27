@@ -2,3 +2,5 @@
 venv/
 *.0
 cogs/__pycache__/
+data/prefixes.json
+data/stats.json

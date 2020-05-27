@@ -1,23 +1,34 @@
 import json
+import platform
 import time
+from datetime import datetime
+import psutil
 import discord
-from discord.ext import commands
+from discord.ext import commands, tasks
 import os
 import sys
 
 #  #  #  REQUIREMENTS  #  #  #
 if not os.path.isdir('./data'):
     os.mkdir('data')
-    if not os.path.isfile('./data/prefixes.json'):
-        with open("data/prefixes.json", "w") as l:
-            l.write('{}')
-            l.close()
+
+if not os.path.isfile('./data/prefixes.json'):
+    with open("data/prefixes.json", "w") as l:
+        l.write('{}')
+        l.close()
+
+if not os.path.isfile('./data/stats.json'):
+    with open("data/stats.json", "w") as m:
+        m.write('{}')
+        m.close()
 
 if not os.path.isfile('./crash.0'):
     print('Missing "crash.0" file, where your bot-token is stored')
     sys.exit(1)
 
 #  #  #  REQUIREMENTS  #  #  #
+
+launchtime = datetime.now()
 
 
 #  #  #  CHECK  #  #  #
@@ -55,13 +66,13 @@ for filename in os.listdir('./cogs'):
 @bot.event
 async def on_ready():
     print("Pronto come", bot.user)
-    await bot.change_presence(activity=discord.Game(name="c-help"))
+    await bot.change_presence(activity=discord.Game(name="c-aiuto"))
 
     # a = commands.clean_content(use_nicknames=True)
     # message = await a.convert(ctx, message)
 
 
-#  #  #  CUSTOM PREFIX  #  #  #
+#  #  #  EVENTS  #  #  #
 
 
 @bot.event
@@ -75,7 +86,9 @@ async def on_guild_join(guild):
         json.dump(prefixes, f, indent=4)
 
     ch = bot.get_channel(715151965713072180)
-    emb = discord.Embed(description=f"<a:YAAY:715156619842814023>\n{bot.user.mention} si è unito al server **{guild.name}**\n proprieatario del server :  **{guild.owner}**\n Membri nel server : **{guild.member_count}**", colour=discord.Colour.green())
+    emb = discord.Embed(
+        description=f"<a:YAAY:715156619842814023>\n{bot.user.mention} si è unito al server **{guild.name}**\n proprieatario del server :  **{guild.owner}**\n Membri nel server : **{guild.member_count}**",
+        colour=discord.Colour.green())
     emb.set_footer(text=f"sono online in {len(bot.guilds)} server", icon_url=bot.user.avatar_url)
     emb.set_thumbnail(url=guild.icon_url)
     if guild.banner:
@@ -97,12 +110,44 @@ async def on_guild_remove(guild):
         await bot.get_channel(714813858530721862).send(str(e) + 'server' + str(guild.id))
 
     ch = bot.get_channel(715151965713072180)
-    emb = discord.Embed(description=f"<a:SAAD:715156620388335647>\n{bot.user.mention} ha lasciato il server **{guild.name}**\n proprieatario del server :  **{guild.owner}**\n Membri nel server : **{guild.member_count}**", colour=discord.Colour.red())
+    emb = discord.Embed(
+        description=f"<a:SAAD:715156620388335647>\n{bot.user.mention} ha lasciato il server **{guild.name}**\n proprieatario del server :  **{guild.owner}**\n Membri nel server : **{guild.member_count}**",
+        colour=discord.Colour.red())
     emb.set_footer(text=f"sono online in {len(bot.guilds)} server", icon_url=bot.user.avatar_url)
     emb.set_thumbnail(url=guild.icon_url)
     if guild.banner:
         emb.set_image(url=guild.banner_url)
     await ch.send(embed=emb)
+
+
+#  #  #  TASK  #  #  #
+
+
+@tasks.loop(seconds=20)
+async def stats():
+    with open("data/stats.json", "r") as f:
+        l = json.load(f)
+
+    uptime = datetime.now() - launchtime
+    hours, remainder = divmod(int(uptime.total_seconds()), 3600)
+    minutes, seconds = divmod(remainder, 60)
+    days, hours = divmod(hours, 24)
+
+    l["library"] = discord.__version__
+    l["python"] = platform.python_version()
+    l["memory"] = psutil.virtual_memory()[2]
+    l["cpu"] = psutil.cpu_percent()
+    l["running"] = platform.system()
+    l["guilds"] = len(bot.guilds)
+    l["users"] = len(bot.users)
+    l["uptime"] = f"{days}d {hours}h {minutes}m {seconds}s"
+
+    with open("data/stats.json", "w") as f:
+        json.dump(l, f, indent=4)
+
+
+stats.start()
+
 
 #  #  #  COMANDI STANDARD  #  #  #
 
@@ -120,22 +165,17 @@ async def ping(ctx):
     pong = round(bot.latency * 1000)
 
     emb = discord.Embed(colour=discord.Colour.green(), description=f"""
-    ```prolog\nLatency  :: {pong} ms\nResponse :: {duration:.2f} ms\n```""", timestamp=ctx.message.created_at,
+    ```prolog\nLatenza  :: {pong} ms\nRisposta :: {duration:.2f} ms\n```""", timestamp=ctx.message.created_at,
                         title="Pong!")
     await msg.edit(embed=emb, content=None)
 
 
-@bot.command(aliases=['invite'], description=f'Mostra la latenza di <@714798417746067547>')
-async def invito(ctx):
-    await ctx.send(f'Invita ciro nel tuo server <https://discord.com/oauth2/authorize?client_id=714798417746067547&permissions=0&scope=bot>')
-
-
-@bot.group(description='Mostra questo messaggio', invoke_without_command=True)
-async def help(ctx):
+@bot.group(aliases=['help'], description='Mostra questo messaggio', invoke_without_command=True)
+async def aiuto(ctx):
     try:
         embed = discord.Embed(title=f"Lista comandi", colour=discord.Colour(0xFCFCFC), timestamp=ctx.message.created_at)
         embed.set_author(name=f"{ctx.author.name}", icon_url=f"{ctx.author.avatar_url}")
-        embed.set_footer(text="https://discord.gg/3jACDJT")
+        embed.set_footer(text="https://discord.gg/Ck5rBtS")
         for x in bot.commands:
             if not x.hidden:
                 if not x.description:
@@ -156,7 +196,7 @@ async def help(ctx):
         await ctx.send(y)
 
 
-@bot.group(description=f'Cambia il prefisso di  <@714798417746067547> in questo server')
+@bot.group(description=f'Cambia il prefisso di  <@714798417746067547> in questo server', invoke_without_command=True)
 @commands.has_permissions(manage_guild=True)
 async def prefisso(ctx, prefisso):
     with open('data/prefixes.json', 'r') as f:
@@ -168,6 +208,27 @@ async def prefisso(ctx, prefisso):
         json.dump(prefixes, f, indent=4)
 
     await ctx.send(f'Ho cambiato il prefisso in questo server in `{prefisso}`')
+
+
+@bot.command(aliases=["stats", "uptime", "about", 'invite', 'invita', 'join'], description='Mostra le statistiche del bot e link utili')
+@commands.bot_has_permissions(embed_links=True)
+async def online(ctx):
+    with open("data/stats.json", "r") as f:
+        l = json.load(f)
+
+    emb = discord.Embed(description=f"**Sviluppatore: `IT | Kewai#9029`\nLibreria: `discord.py {discord.__version__}"
+                                    f"`\nVersione Python: `{platform.python_version()}`"
+                                    f"\nMemoria: `{psutil.virtual_memory()[2]}%`"
+                                    f"\nCPU: `{psutil.cpu_percent()}%`"
+                                    f'\nUptime: `{l["uptime"]}`'
+                                    f"\nOnline su: `{platform.system()}`"
+                                    f"\nSono in: `{len(bot.guilds)}` server"
+                                    f"\nUtenti: `{len(bot.users)}`"
+                                    f"\nInvitami nel tuo server: [clicca qui](https://discord.com/oauth2/authorize?client_id=714798417746067547&permissions=0&scope=bot)"
+                                    f"\nEntra nel server di <@714798417746067547>: [clicca qui](https://discord.gg/Ck5rBtS)**",
+                        colour=discord.Colour.gold())
+
+    await ctx.send(embed=emb)
 
 
 #  #  #  OWNER  #  #  #
@@ -233,13 +294,12 @@ async def cogs(ctx):
     await ctx.send(embed=embed)
 
 
-@help.command(name='me')
+@aiuto.command(name='me')
 @commands.check(owner)
 async def me_subcommand(ctx):
     embed = discord.Embed(title="Owner Panel", colour=discord.Colour(0xFCFCFC), timestamp=ctx.message.created_at)
 
     embed.set_author(name=f"{ctx.author.name}", icon_url=f"{ctx.author.avatar_url}")
-    embed.set_footer(text="https://discord.gg/3jACDJT")
 
     for x in bot.commands:
         if x.hidden:
