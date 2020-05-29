@@ -210,7 +210,7 @@ async def prefisso(ctx, prefisso):
     await ctx.send(f'Ho cambiato il prefisso in questo server in `{prefisso}`')
 
 
-@bot.command(aliases=["stats", "uptime", "about", 'invite', 'invita', 'join'], description='Mostra le statistiche del bot e link utili')
+@bot.command(aliases=["stats", "uptime", "about", 'invite', 'invita'], description='Mostra le statistiche del bot e link utili')
 @commands.bot_has_permissions(embed_links=True)
 async def online(ctx):
     with open("data/stats.json", "r") as f:
