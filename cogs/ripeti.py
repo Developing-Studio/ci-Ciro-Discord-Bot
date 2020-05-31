@@ -13,7 +13,7 @@ class ripeti(commands.Cog):
 
     null = ''
 
-    @commands.bot_has_permissions(attach_files=True)
+    @commands.bot_has_permissions(attach_files=True, embed_links=True)
     @commands.command(aliases=['repeat'], description='Ripete il tuo messaggio')
     async def ripeti(self, ctx, *, arg=null):
         message = ctx.message
@@ -36,7 +36,7 @@ class ripeti(commands.Cog):
                 arg = await commands.clean_content(use_nicknames=True).convert(ctx, arg)
                 await ctx.send(arg)
 
-    @commands.bot_has_permissions(manage_messages=True, attach_files=True)
+    @commands.bot_has_permissions(manage_messages=True, attach_files=True, embed_links=True)
     @commands.has_permissions(manage_messages=True, mention_everyone=True)
     @commands.command(aliases=['repeatdel'], description='Ripete e cancella il tuo messaggio')
     async def ripeticanc(self, ctx, *, arg=null):
@@ -60,7 +60,7 @@ class ripeti(commands.Cog):
                 await ctx.message.delete()
                 await ctx.send(arg)
 
-    @commands.bot_has_permissions(manage_messages=True, administrator=True, attach_files=True)
+    @commands.bot_has_permissions(manage_messages=True, administrator=True, attach_files=True, embed_links=True)
     @commands.has_permissions(manage_messages=True, mention_everyone=True)
     @commands.command(aliases=['send2'], description='Invia il tuo messaggio in un canale')
     async def inoltra(self, ctx, target: discord.TextChannel, *, arg=null):

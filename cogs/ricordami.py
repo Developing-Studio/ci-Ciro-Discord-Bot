@@ -9,8 +9,7 @@ class ricordami(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-
-    @commands.bot_has_permissions(manage_messages=True)
+    @commands.bot_has_permissions(embed_links=True)
     @commands.command(aliasas=['promemoria'], description='Ti ricorda di fare qualcosa dopo un lasso di tempo')
     async def ricordami(self, ctx, tra, tempo: int, tipo_di_tempo, *, what=None):
         if tra == 'tra':
