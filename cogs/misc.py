@@ -35,7 +35,8 @@ class misc(commands.Cog):
                                                     value += f'  {c.name} {a.name}\n'
                                         except:
                                             pass
-                                embed.add_field(name=f"Modulo : {x[:-3]}", value=value, inline=False)
+                                if value != '':
+                                    embed.add_field(name=f"Modulo : {x[:-3]}", value=value, inline=False)
                             except:
                                 pass
                 embed.add_field(name=f" ឵឵ ", value='Per maggiori informazioni scrivi:\nhelp `nome comando`', inline=False)
@@ -162,6 +163,10 @@ class misc(commands.Cog):
             embed = discord.Embed(title="", colour=discord.Colour.red())
             embed.add_field(name="⚠ | Questo comando modifica il prefisso in questo server", value='```Esempio:\nprefisso *\n```', inline=False)
             await ctx.send(embed=embed)
+
+    @commands.command(aliases=['vote', 'voto'], description='Mostra il link per votare il bot')
+    async def vota(self, ctx):
+        await ctx.send('https://top.gg/bot/714798417746067547/vote')
 
 
 def setup(bot):

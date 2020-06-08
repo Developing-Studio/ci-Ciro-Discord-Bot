@@ -3,8 +3,8 @@
 Ciro is a Discord multifunctional Bot made with discord.py
 
 ### Python Module Prerequisites 
+`apt install python3 python3-venv python3-pip`
 `pip3 install discord.py discord.py[voice] asyncio wavelink typing datetime psutil aiohttp`
-
 
 ## Music Bot Prerequisites
 Download [LavaLink](https://github.com/Frederikam/Lavalink/releases) or [LavaLinkARM](https://github.com/Cog-Creators/Lavalink-Jars/releases)

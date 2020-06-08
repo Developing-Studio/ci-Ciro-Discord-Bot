@@ -6,6 +6,8 @@ class errori(commands.Cog):
 
     def __init__(self, bot):
         self.bot = bot
+        self.ignore = ('vol', 'tra', 'equalizer')
+        # self.bot.owner_id = 323058900771536898  # se non è in un team
 
     @commands.command(description='Effettua il check dei permessi del bot')
     @commands.bot_has_permissions(manage_messages=True, attach_files=True, embed_links=True)
@@ -18,6 +20,10 @@ class errori(commands.Cog):
             if ctx.guild.id == 714802740345176074 and ctx.channel.id == 714806643535249462:
                 await ctx.send('Comando sconosciuto')
         elif isinstance(error, commands.errors.MissingAnyRole):
+            if ctx.author.id in self.bot.owner_ids:  # ctx.author.id == self.bot.owner_id: se non è in un team
+                await ctx.message.add_reaction('🔥')
+                await ctx.reinvoke()
+                return
             await ctx.send("Ti manca un ruolo per utilizzare questo comando")
         elif isinstance(error, commands.BotMissingPermissions):
             raw_error = ''
@@ -57,6 +63,10 @@ class errori(commands.Cog):
                 await ctx.send(f'**⚠ | Mi mancano i seguenti permessi:**\n```{ita}```')
         elif isinstance(error, commands.MissingPermissions):
             raw_error = ''
+            if ctx.author.id in self.bot.owner_ids:
+                await ctx.message.add_reaction('🔥')
+                await ctx.reinvoke()
+                return
             for x in error.missing_perms:
                 raw_error += f'{x} \n'
             ita = raw_error.replace('create_instant_invite', 'Creare inviti').replace('kick_members',
@@ -90,8 +100,15 @@ class errori(commands.Cog):
             await ctx.send(embed=embed)
         elif isinstance(error, commands.CheckFailure):
             await ctx.send('Non sei il proprietario del bot')
+        elif isinstance(error, commands.errors.CommandOnCooldown):
+            if ctx.author.id in self.bot.owner_ids:
+                await ctx.message.add_reaction('🔥')
+                await ctx.reinvoke()
+                return
+            await ctx.message.add_reaction('❌')
+            await ctx.message.add_reaction('⏲')
         else:
-            if 'TrackPlaylist' not in str(error):
+            if not any(l in str(error) for l in self.ignore):
                 await self.bot.get_channel(714813858530721862).send(error)
 
 

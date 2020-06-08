@@ -1,4 +1,5 @@
 import asyncio
+import random
 import re
 import wavelink
 import discord
@@ -18,7 +19,7 @@ class QueueControl:
         self.next = asyncio.Event()
         self.queue = asyncio.Queue()
 
-        self.volume = 40
+        self.volume = 20
         self.now_playing = None
 
         self.bot.loop.create_task(self.controller_loop())
@@ -142,7 +143,7 @@ class music(commands.Cog):
                             controller = self.get_controller(ctx)
                             track = Track(track.id, track.info, requester=ctx.author)
                             await controller.queue.put(track)
-                        await ctx.send(f'Ho aggiunto {len(tracks.tracks)} alla coda.')
+                        await ctx.send(f'Ho aggiunto {len(tracks.tracks)} brani alla coda.')
                 else:
                     await ctx.send('Sei mutato, anche se riproducessi un brano non sentiresti nulla!')
             except AttributeError:
@@ -198,6 +199,7 @@ class music(commands.Cog):
 
 
     @commands.command(aliases=['vol'], description='Serve ad visualizzare, abbassare o alzare il volume')
+    @commands.cooldown(1, 30, commands.BucketType.user)
     async def volume(self, ctx, *, vol: int = None):
         """Set the player volume."""
         if not vol:
@@ -209,10 +211,10 @@ class music(commands.Cog):
                     player = self.bot.wavelink.get_player(ctx.guild.id)
                     controller = self.get_controller(ctx)
 
-                    vol = max(min(vol, 200), 0)
+                    vol = max(min(vol, 100), 0)
                     controller.volume = vol
 
-                    await ctx.send(f'Ho impostato il volume a `{vol}/200`')
+                    await ctx.send(f'Ho impostato il volume a `{vol}/100`')
                     await player.set_volume(vol)
                 else:
                     await ctx.send('Sei mutato, anche se modificassi il volume non sentiresti nulla!')
@@ -239,7 +241,7 @@ class music(commands.Cog):
 
         controller.now_playing = await ctx.send(embed=embed)
 
-    @commands.command(aliases=['q', 'queue', 'c'], description='Serve a vedere la coda di riproduzione')
+    @commands.group(aliases=['q', 'queue', 'c'], description='Serve a vedere la coda di riproduzione', invoke_without_command=True)
     @commands.bot_has_permissions(embed_links=True)
     async def coda(self, ctx):
         player = self.bot.wavelink.get_player(ctx.guild.id)
@@ -254,6 +256,19 @@ class music(commands.Cog):
         embed = discord.Embed(title=f'I prossimi {len(upcoming)} brani', description=fmt)
 
         await ctx.send(embed=embed)
+
+    @coda.command(name='cancella', aliases=['canc', 'delete', 'del', 'svuota', 'reset', 'clear'], description='Svuota la coda di riproduzione')
+    @commands.cooldown(1, 60, commands.BucketType.user)
+    async def svuota_subcommand(self, ctx):
+        try:
+            if not ctx.author.voice.self_deaf:
+                try:
+                    del self.controllers[ctx.guild.id]
+                except KeyError:
+                    return await ctx.send('Non cè niente in coda.')
+                await ctx.send('Ho cancellato la coda.')
+        except AttributeError:
+            await ctx.send('Non sei connesso a nessun canale vocale!')
 
     @commands.command(aliases=['disconnect', 'disconnetti', 'leave', 'l'], description='Serve a disconnettere il bot da un canale vocale nel server')
     async def stop(self, ctx):
@@ -284,6 +299,53 @@ class music(commands.Cog):
             embed.add_field(name=f"{track}", value=u'\u200b', inline=False)
 
         await ctx.send(embed=embed)
+
+    @commands.command(aliases=['mischia'], description='Serve a vedere la coda di riproduzione')
+    @commands.bot_has_permissions(embed_links=True)
+    async def shuffle(self, ctx):
+        player = self.bot.wavelink.get_player(ctx.guild.id)
+        controller: Union[QueueControl, Any] = self.get_controller(ctx)
+
+        if not player.current or not controller.queue._queue:
+            return await ctx.send('Non ci sono canzoni in coda!')
+
+        random.shuffle(controller.queue._queue)
+
+        await ctx.send('Ho mischiato la coda!')
+
+    @commands.command(aliases=['eq', 'equalizer'])
+    @commands.is_owner()
+    async def equalizzatore(self, ctx, *, equalizer: str):
+        """Change the players equalizer."""
+        player = self.bot.wavelink.get_player(ctx.guild.id)
+        controller: Union[QueueControl, Any] = self.get_controller(ctx)
+
+        if not player.is_connected:
+            return
+
+        flat = ('flat', 'norm', 'normale', 'spento', 'off')
+        boost = ('boost', 'bassi', 'bass')
+        metal = 'metal'
+        piano = 'piano'
+
+        if equalizer.lower() in flat:
+            eq = wavelink.Equalizer.flat()
+            await player.set_eq(eq)
+            await ctx.send("Ho ripristinato l'equalizzatore", delete_after=15)
+        elif equalizer.lower() in boost:
+            eq = wavelink.Equalizer.boost()
+            await player.set_eq(eq)
+            await ctx.send(f'Ho aumentato i bassi!', delete_after=15)
+        elif equalizer.lower() == metal:
+            eq = wavelink.Equalizer.metal()
+            await player.set_eq(eq)
+            await ctx.send("Ho impostato un suono metal", delete_after=15)
+        elif equalizer.lower() == piano:
+            eq = wavelink.Equalizer.piano()
+            await player.set_eq(eq)
+            await ctx.send("Ho impostato un suono piano(riduce i bassi)", delete_after=15)
+        else:
+            return await ctx.send(f'Sono disponibili i seguenti parametri: `normale` `bassi` `metal` `piano`')
 
     @commands.command(hidden=True, aliases=['act'], description='Mostra in quali server si sta ascoltando musica')
     @commands.bot_has_permissions(embed_links=True)
