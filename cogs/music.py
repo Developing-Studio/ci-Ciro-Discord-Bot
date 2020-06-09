@@ -257,18 +257,20 @@ class music(commands.Cog):
 
         await ctx.send(embed=embed)
 
-    @coda.command(name='cancella', aliases=['canc', 'delete', 'del', 'svuota', 'reset', 'clear'], description='Svuota la coda di riproduzione')
-    @commands.cooldown(1, 60, commands.BucketType.user)
-    async def svuota_subcommand(self, ctx):
-        try:
-            if not ctx.author.voice.self_deaf:
-                try:
-                    del self.controllers[ctx.guild.id]
-                except KeyError:
-                    return await ctx.send('Non cè niente in coda.')
-                await ctx.send('Ho cancellato la coda.')
-        except AttributeError:
-            await ctx.send('Non sei connesso a nessun canale vocale!')
+    #@coda.command(name='cancella', aliases=['canc', 'delete', 'del', 'svuota', 'reset', 'clear'], description='Svuota la coda di riproduzione')
+    #@commands.cooldown(1, 60, commands.BucketType.user)
+    #async def svuota_subcommand(self, ctx):
+        #try:
+            #if not ctx.author.voice.self_deaf:
+                #try:
+                    #del self.controllers[ctx.guild.id]
+                #except KeyError:
+                    #return await ctx.send('Non cè niente in coda.')
+                #await ctx.send('Ho cancellato la coda.')
+                #controller = self.get_controller(ctx)
+                #controller.channel = ctx.channel
+        #except AttributeError:
+            #await ctx.send('Non sei connesso a nessun canale vocale!')
 
     @commands.command(aliases=['disconnect', 'disconnetti', 'leave', 'l'], description='Serve a disconnettere il bot da un canale vocale nel server')
     async def stop(self, ctx):
@@ -289,16 +291,22 @@ class music(commands.Cog):
         except AttributeError:
             await ctx.send('Non sei connesso a nessun canale vocale!')
 
-    @commands.command(description='Cerca un brano su yt')
+    @commands.command(description='Cerca il titolo di un brano su yt')
     @commands.bot_has_permissions(embed_links=True)
-    async def yt(self, ctx, *, query):
-        embed = discord.Embed(title=f"Ho trovato questi risultati per: {query}", color=0xd629c9)
-        query = await self.bot.wavelink.get_tracks(f'ytsearch: {query}')
+    async def yt(self, ctx, *, query=None):
+        if query:
+            embed = discord.Embed(title=f"Ho trovato questi risultati per: {query}", color=0xd629c9)
+            query = await self.bot.wavelink.get_tracks(f'ytsearch: {query}')
 
-        for track in query[0:9]:
-            embed.add_field(name=f"{track}", value=u'\u200b', inline=False)
+            for track in query[0:9]:
+                embed.add_field(name=f"{track}", value=u'\u200b', inline=False)
 
-        await ctx.send(embed=embed)
+            await ctx.send(embed=embed)
+        else:
+            embed = discord.Embed(title="", colour=discord.Colour.red())
+            embed.add_field(name="Serve a cercare il titolo esatto di una canzone", value=f'Esempio:\n`{self.bot.command_prefix(self.bot, message=ctx.message)}yt Luca Sarracino`\nSucessivamente facendo copia incolla dal risultato\n`{self.bot.command_prefix(self.bot, message=ctx.message)}play Luca Sarracino feat Elvira Visone " Mi hai rotto il cuore "`', inline=False)
+            await ctx.send(embed=embed)
+
 
     @commands.command(aliases=['mischia'], description='Serve a vedere la coda di riproduzione')
     @commands.bot_has_permissions(embed_links=True)

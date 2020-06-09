@@ -168,6 +168,14 @@ class misc(commands.Cog):
     async def vota(self, ctx):
         await ctx.send('https://top.gg/bot/714798417746067547/vote')
 
+    @commands.command(description='Invia un feedback allo sviluppatore del bot')
+    async def feedback(self, ctx, *, message=None):
+        if message:
+            await self.bot.get_channel(715194608870752286).send(str(ctx.author) + ' ' + message)
+            await ctx.send('feedback inviato.')
+        else:
+            await ctx.send(f'Esempio:\n{self.bot.command_prefix(self.bot, message=ctx.message)}feedback Aggiungi un sasso')
+
 
 def setup(bot):
     bot.add_cog(misc(bot))
