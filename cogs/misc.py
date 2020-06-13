@@ -3,9 +3,13 @@ from datetime import datetime
 import json
 import time
 import platform
+from io import BytesIO
+from tempfile import TemporaryFile
 import psutil
 import discord
 from discord.ext import commands, tasks
+from gtts import gTTS
+import re
 
 
 
@@ -177,6 +181,24 @@ class misc(commands.Cog):
             await ctx.send('feedback inviato.')
         else:
             await ctx.send(f'Esempio:\n{self.bot.command_prefix(self.bot, message=ctx.message)}feedback Aggiungi un sasso')
+
+    @commands.command(description='Invia un file mp3 con il testo che hai scritto')
+    async def tts(self, ctx, *, message=None):
+        if message:
+            try:
+                message = await commands.clean_content(use_nicknames=True).convert(ctx, message)
+                message = re.sub("<(?P<animated>a?):(?P<name>[a-zA-Z0-9_]{2,32}):(?P<id>[0-9]{18,22})>", "", message)
+                message = message.replace('@', '')
+                tts = gTTS(text=message, lang='it')
+                f = TemporaryFile()
+                tts.write_to_fp(f)
+                f.seek(0)  # file object
+                await ctx.send(file=discord.File(BytesIO(f.read()), filename='tts.mp3'))
+                f.close()
+            except:
+                await ctx.send('Cè qualcosa che non va...')
+        else:
+            await ctx.send('Esempio:\n tts Ciao CIRO')
 
 
 def setup(bot):
