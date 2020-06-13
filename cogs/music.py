@@ -1,6 +1,10 @@
 import asyncio
+import json
 import random
 import re
+
+import aiohttp
+import requests
 import wavelink
 import discord
 import itertools
@@ -46,7 +50,7 @@ class QueueControl:
 class Track(wavelink.Track):
     """Wavelink Track object with a requester attribute."""
 
-    __slots__ = ('requester', )
+    __slots__ = ('requester',)
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args)
@@ -70,7 +74,8 @@ class music(commands.Cog):
         # LavaLinkServer = '192.168.1.123'
         nodes = await self.bot.wavelink.initiate_node(host=LavaLinkServer, port=2333,
                                                       rest_uri="http://" + LavaLinkServer + ":2333",
-                                                      password="IT | Kewai#9029", identifier=self.bot.user, region='eu_central')
+                                                      password="IT | Kewai#9029", identifier=self.bot.user,
+                                                      region='eu_central')
 
         nodes.set_hook(self.on_event_hook)
 
@@ -128,7 +133,8 @@ class music(commands.Cog):
                     player = self.bot.wavelink.get_player(ctx.guild.id)
                     if not player.is_connected:
                         await ctx.invoke(self.connect_)
-                        tracks_welcome = await self.bot.wavelink.get_tracks('https://www.youtube.com/watch?v=jLtbFWJm9_M')
+                        tracks_welcome = await self.bot.wavelink.get_tracks(
+                            'https://www.youtube.com/watch?v=jLtbFWJm9_M')
                         tracks_welcome = tracks_welcome[0]
                         controller = self.get_controller(ctx)
                         await controller.queue.put(tracks_welcome)
@@ -197,7 +203,6 @@ class music(commands.Cog):
         except AttributeError:
             await ctx.send('Non sei connesso a nessun canale vocale!')
 
-
     @commands.command(aliases=['vol'], description='Serve ad visualizzare, abbassare o alzare il volume')
     @commands.cooldown(1, 30, commands.BucketType.user)
     async def volume(self, ctx, *, vol: int = None):
@@ -221,7 +226,8 @@ class music(commands.Cog):
             except AttributeError:
                 await ctx.send('Non sei connesso a nessun canale vocale!')
 
-    @commands.command(aliases=['np', 'current', 'nowplaying', 'come', 'titolo'], description='Ti dice il titolo del brano in riproduzione')
+    @commands.command(aliases=['np', 'current', 'nowplaying', 'come', 'titolo'],
+                      description='Ti dice il titolo del brano in riproduzione')
     @commands.bot_has_permissions(embed_links=True)
     async def now_playing(self, ctx):
         player = self.bot.wavelink.get_player(ctx.guild.id)
@@ -241,7 +247,127 @@ class music(commands.Cog):
 
         controller.now_playing = await ctx.send(embed=embed)
 
-    @commands.group(aliases=['q', 'queue', 'c'], description='Serve a vedere la coda di riproduzione', invoke_without_command=True)
+    @commands.command(aliases=['lc', 'testo'], description='Mostra il testo del brano in riproduzione')
+    async def lyrics(self, ctx):
+        player = self.bot.wavelink.get_player(ctx.guild.id)
+        # print(player.current.title)
+        if '-' in player.current.title:
+            async with aiohttp.ClientSession() as a:
+                data = player.current.title.split('(')[0].split('feat')[0].split('ft.')[0].split('OFFICIAL')[0].split(
+                    'Official')[0].split('- ')
+                link = 'https://api.lyrics.ovh/v1/' + data[0] + '/' + data[1]
+                # print('try normal')
+                # print(link)
+                r = await a.get(link)
+                b = await r.json()
+                try:
+                    oof = str(b['lyrics'])
+                    oof = oof.split("\n")
+                    pag = commands.Paginator(prefix=None, suffix=None)
+                    for a in oof:
+                        pag.add_line(a)
+                    for a in pag.pages:
+                        await ctx.send(a)
+                        await asyncio.sleep(0.5)
+                except KeyError:  # try reverse
+                    link = 'https://api.lyrics.ovh/v1/' + data[1] + '/' + data[0]
+                    # print('try reverse')
+                    # print(link)
+                    r = await a.get(link)
+                    b = await r.json()
+                    try:
+                        oof = str(b['lyrics'])
+                        oof = oof.split("\n")
+                        pag = commands.Paginator(prefix=None, suffix=None)
+                        for a in oof:
+                            pag.add_line(a)
+                        for a in pag.pages:
+                            await ctx.send(a)
+                            await asyncio.sleep(0.5)
+                    except KeyError:  # try split , 1
+                        link = 'https://api.lyrics.ovh/v1/' + data[0].split(',')[0] + '/' + data[1]
+                        # print('try split , 1')
+                        # print(link)
+                        r = await a.get(link)
+                        b = await r.json()
+                        try:
+                            oof = str(b['lyrics'])
+                            oof = oof.split("\n")
+                            pag = commands.Paginator(prefix=None, suffix=None)
+                            for a in oof:
+                                pag.add_line(a)
+                            for a in pag.pages:
+                                await ctx.send(a)
+                                await asyncio.sleep(0.5)
+                        except KeyError:  # try split , 2
+                            # print('try split 2')
+                            link = 'https://api.lyrics.ovh/v1/' + data[0].split(',')[1] + '/' + data[1]
+                            # print(link)
+                            r = await a.get(link)
+                            b = await r.json()
+                            try:
+                                oof = str(b['lyrics'])
+                                oof = oof.split("\n")
+                                pag = commands.Paginator(prefix=None, suffix=None)
+                                for a in oof:
+                                    pag.add_line(a)
+                                for a in pag.pages:
+                                    await ctx.send(a)
+                                    await asyncio.sleep(0.5)
+                            except KeyError:  # try split 3
+                                # print('try split 3')
+                                link = 'https://api.lyrics.ovh/v1/' + data[0].split(',')[2] + '/' + data[1]
+                                # print(link)
+                                r = await a.get(link)
+                                b = await r.json()
+                                try:
+                                    oof = str(b['lyrics'])
+                                    oof = oof.split("\n")
+                                    pag = commands.Paginator(prefix=None, suffix=None)
+                                    for a in oof:
+                                        pag.add_line(a)
+                                    for a in pag.pages:
+                                        await ctx.send(a)
+                                        await asyncio.sleep(0.5)
+                                except:
+                                    await ctx.send('Non trovo il testo di questo brano')
+
+        else:
+            async with aiohttp.ClientSession() as a:
+                data = player.current.title.split('(')[0].split('feat')[0].split('ft.')[0].split('- ')
+                aut = player.current.author.replace('Official', '').replace('OFFICIAL', '').replace('Vevo', '').replace(
+                    'VEVO', '')
+                link = 'https://api.lyrics.ovh/v1/' + aut + '/' + data[0]
+                r = await a.get(link)
+                b = await r.json()
+                try:
+                    oof = str(b['lyrics'])
+                    oof = oof.split("\n")
+                    pag = commands.Paginator(prefix=None, suffix=None)
+                    for a in oof:
+                        pag.add_line(a)
+                    for a in pag.pages:
+                        await ctx.send(a)
+                        await asyncio.sleep(0.5)
+                except KeyError:
+                    await ctx.send('Non trovo il testo per questo brano')
+        # ORIGINAL
+        # try:
+        # response = requests.get('https://api.lyrics.ovh/v1/' + player.current.author + '/' + player.current.title)
+        # json_data = json.loads(response.content)
+        # print(player.current.title)
+        # print(player.current.author)
+        # print(player.current.info)
+        # try:
+        # lyrics = json_data['lyrics']
+        # print(lyrics)  # testo
+        # except KeyError:
+        # print('not found')
+        # except:
+        # print('qualcosa non va')
+
+    @commands.group(aliases=['q', 'queue', 'c'], description='Serve a vedere la coda di riproduzione',
+                    invoke_without_command=True)
     @commands.bot_has_permissions(embed_links=True)
     async def coda(self, ctx):
         player = self.bot.wavelink.get_player(ctx.guild.id)
@@ -257,22 +383,23 @@ class music(commands.Cog):
 
         await ctx.send(embed=embed)
 
-    #@coda.command(name='cancella', aliases=['canc', 'delete', 'del', 'svuota', 'reset', 'clear'], description='Svuota la coda di riproduzione')
-    #@commands.cooldown(1, 60, commands.BucketType.user)
-    #async def svuota_subcommand(self, ctx):
-        #try:
-            #if not ctx.author.voice.self_deaf:
-                #try:
-                    #del self.controllers[ctx.guild.id]
-                #except KeyError:
-                    #return await ctx.send('Non cè niente in coda.')
-                #await ctx.send('Ho cancellato la coda.')
-                #controller = self.get_controller(ctx)
-                #controller.channel = ctx.channel
-        #except AttributeError:
-            #await ctx.send('Non sei connesso a nessun canale vocale!')
+    #  @coda.command(name='cancella', aliases=['canc', 'delete', 'del', 'svuota', 'reset', 'clear'], description='Svuota la coda di riproduzione')
+    #  @commands.cooldown(1, 60, commands.BucketType.user)
+    #  async def svuota_subcommand(self, ctx):
+    #  try:
+    #  if not ctx.author.voice.self_deaf:
+    #  try:
+    #  del self.controllers[ctx.guild.id]
+    #  except KeyError:
+    #  return await ctx.send('Non cè niente in coda.')
+    #  await ctx.send('Ho cancellato la coda.')
+    #  controller = self.get_controller(ctx)
+    #  controller.channel = ctx.channel
+    #  except AttributeError:
+    #  await ctx.send('Non sei connesso a nessun canale vocale!')
 
-    @commands.command(aliases=['disconnect', 'disconnetti', 'leave', 'l'], description='Serve a disconnettere il bot da un canale vocale nel server')
+    @commands.command(aliases=['disconnect', 'disconnetti', 'leave', 'l'],
+                      description='Serve a disconnettere il bot da un canale vocale nel server')
     async def stop(self, ctx):
         """Stop and disconnect the player and controller."""
         try:
@@ -285,8 +412,9 @@ class music(commands.Cog):
                     await player.disconnect()
                     return await ctx.send('Non cè niente da stoppare.')
 
-                await player.stop()
-                await player.disconnect()
+                # await player.stop()
+                # await player.disconnect()
+                await player.destroy()
                 await ctx.send('Mi sono disconnesso con successo.')
         except AttributeError:
             await ctx.send('Non sei connesso a nessun canale vocale!')
@@ -304,9 +432,10 @@ class music(commands.Cog):
             await ctx.send(embed=embed)
         else:
             embed = discord.Embed(title="", colour=discord.Colour.red())
-            embed.add_field(name="Serve a cercare il titolo esatto di una canzone", value=f'Esempio:\n`{self.bot.command_prefix(self.bot, message=ctx.message)}yt Luca Sarracino`\nSucessivamente facendo copia incolla dal risultato\n`{self.bot.command_prefix(self.bot, message=ctx.message)}play Luca Sarracino feat Elvira Visone " Mi hai rotto il cuore "`', inline=False)
+            embed.add_field(name="Serve a cercare il titolo esatto di una canzone",
+                            value=f'Esempio:\n`{self.bot.command_prefix(self.bot, message=ctx.message)}yt Luca Sarracino`\nSucessivamente facendo copia incolla dal risultato\n`{self.bot.command_prefix(self.bot, message=ctx.message)}play Luca Sarracino feat Elvira Visone " Mi hai rotto il cuore "`',
+                            inline=False)
             await ctx.send(embed=embed)
-
 
     @commands.command(aliases=['mischia'], description='Serve a vedere la coda di riproduzione')
     @commands.bot_has_permissions(embed_links=True)
@@ -321,7 +450,7 @@ class music(commands.Cog):
 
         await ctx.send('Ho mischiato la coda!')
 
-    @commands.command(aliases=['eq', 'equalizer'])
+    @commands.command(aliases=['eq', 'equalizer'], description="Cambia l'equalizzatore", hidden=True)
     @commands.is_owner()
     async def equalizzatore(self, ctx, *, equalizer: str):
         """Change the players equalizer."""
@@ -355,7 +484,7 @@ class music(commands.Cog):
         else:
             return await ctx.send(f'Sono disponibili i seguenti parametri: `normale` `bassi` `metal` `piano`')
 
-    @commands.command(hidden=True, aliases=['act'], description='Mostra in quali server si sta ascoltando musica')
+    @commands.command(aliases=['act'], description='Mostra in quali server si sta ascoltando musica', hidden=True)
     @commands.bot_has_permissions(embed_links=True)
     @commands.is_owner()
     async def activity(self, ctx):
@@ -364,6 +493,25 @@ class music(commands.Cog):
             embed.add_field(name=f" ឵឵", value=f'[{x}](https://discordapp.com/channels/{x})', inline=False)
         await ctx.send(embed=embed)
 
+    @commands.command(description="Prova a creare un invito per l'id del server", hidden=True)
+    @commands.is_owner()
+    async def get(self, ctx, ID=None):
+        if ID:
+            try:
+                ID = int(ID)
+            except:
+                return await ctx.send("L'ID deve essere un numero")
+            g = discord.utils.get(self.bot.guilds, id=ID)
+            if any(l.id == ID for l in self.bot.guilds):
+                try:
+                    for a in g.text_channels:
+                        return await ctx.send(await a.create_invite(max_uses=1))
+                except:
+                    pass
+            else:
+                await ctx.send('Non sono in quel server')
+        else:
+            return await ctx.send("Fornisci l'ID")
 
 
 def setup(bot):

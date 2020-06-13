@@ -171,7 +171,9 @@ class misc(commands.Cog):
     @commands.command(description='Invia un feedback allo sviluppatore del bot')
     async def feedback(self, ctx, *, message=None):
         if message:
-            await self.bot.get_channel(715194608870752286).send(str(ctx.author) + ' ' + message)
+            embed = discord.Embed(title="", colour=discord.Colour.blue())
+            embed.add_field(name=ctx.author, value=f'```{message}```', inline=False)
+            await self.bot.get_channel(715194608870752286).send(embed=embed)
             await ctx.send('feedback inviato.')
         else:
             await ctx.send(f'Esempio:\n{self.bot.command_prefix(self.bot, message=ctx.message)}feedback Aggiungi un sasso')
