@@ -1,7 +1,11 @@
 .idea/
 venv/
 *.0
+*.1
 cogs/__pycache__/
 data/stats.json
 data/prefixes.json
 cogs/test.py
+cogs/seed.py
+data/skyshit24.py
+*.pyc

@@ -1,16 +1,14 @@
+import asyncio
 import os
 from datetime import datetime
 import json
 import time
 import platform
-from io import BytesIO
-from tempfile import TemporaryFile
+import aiohttp
 import psutil
 import discord
 from discord.ext import commands, tasks
-from gtts import gTTS
-import re
-
+from discord.ext.commands import RoleConverter
 
 
 class misc(commands.Cog):
@@ -43,7 +41,8 @@ class misc(commands.Cog):
                                     embed.add_field(name=f"Modulo : {x[:-3]}", value=value, inline=False)
                             except:
                                 pass
-                embed.add_field(name=f" ឵឵ ", value='Per maggiori informazioni scrivi:\nhelp `nome comando`', inline=False)
+                embed.add_field(name=f" ឵឵ ", value='Per maggiori informazioni scrivi:\nhelp `nome comando`',
+                                inline=False)
                 await ctx.send(embed=embed)
             else:
                 raw_comando = self.bot.get_command(comando)
@@ -51,7 +50,9 @@ class misc(commands.Cog):
                     await ctx.send('Questo comando non esiste!')
                     return
                 if str(raw_comando.aliases) != '[]':
-                    raw_comando.aliases = str(raw_comando.aliases).replace("[", "").replace("]", "").replace("'", "`").replace(",", " -")
+                    raw_comando.aliases = str(raw_comando.aliases).replace("[", "").replace("]", "").replace("'",
+                                                                                                             "`").replace(
+                        ",", " -")
                     await ctx.send(f"Alias : {raw_comando.aliases}\nDescrizione : {raw_comando.description}")
                 else:
                     await ctx.send(f"Descrizione : {raw_comando.description}")
@@ -87,8 +88,6 @@ class misc(commands.Cog):
                 else:
                     await ctx.send(f"Descrizione : {raw_comando.description}")
 
-
-
     @commands.bot_has_permissions(embed_links=True)
     @commands.command(description=f'Mostra la latenza di <@714798417746067547>')
     async def ping(self, ctx):
@@ -107,7 +106,8 @@ class misc(commands.Cog):
                             title="Pong!")
         await msg.edit(embed=emb, content=None)
 
-    @commands.command(aliases=["stats", "uptime", "about", 'invite', 'invita'], description='Mostra le statistiche del bot e link utili')
+    @commands.command(aliases=["stats", "uptime", "about", 'invite', 'invita'],
+                      description='Mostra le statistiche del bot e link utili')
     @commands.bot_has_permissions(embed_links=True)
     async def online(self, ctx):
         with open("data/stats.json", "r") as f:
@@ -150,7 +150,8 @@ class misc(commands.Cog):
         with open("data/stats.json", "w") as f:
             json.dump(l, f, indent=4)
 
-    @commands.group(description=f'Cambia il prefisso di  <@714798417746067547> in questo server', invoke_without_command=True)
+    @commands.group(description=f'Cambia il prefisso di  <@714798417746067547> in questo server',
+                    invoke_without_command=True)
     @commands.has_permissions(manage_guild=True)
     async def prefisso(self, ctx, prefisso: str = None):
         if prefisso:
@@ -165,7 +166,8 @@ class misc(commands.Cog):
             await ctx.send(f'Ho cambiato il prefisso di questo server in `{prefisso}`')
         else:
             embed = discord.Embed(title="", colour=discord.Colour.red())
-            embed.add_field(name="⚠ | Questo comando modifica il prefisso in questo server", value='```Esempio:\nprefisso *\n```', inline=False)
+            embed.add_field(name="⚠ | Questo comando modifica il prefisso in questo server",
+                            value='```Esempio:\nprefisso *\n```', inline=False)
             await ctx.send(embed=embed)
 
     @commands.command(aliases=['vote', 'voto'], description='Mostra il link per votare il bot')
@@ -180,25 +182,110 @@ class misc(commands.Cog):
             await self.bot.get_channel(715194608870752286).send(embed=embed)
             await ctx.send('feedback inviato.')
         else:
-            await ctx.send(f'Esempio:\n{self.bot.command_prefix(self.bot, message=ctx.message)}feedback Aggiungi un sasso')
+            await ctx.send(
+                f'Esempio:\n{self.bot.command_prefix(self.bot, message=ctx.message)}feedback Aggiungi un sasso')
 
-    @commands.command(description='Invia un file mp3 con il testo che hai scritto')
-    async def tts(self, ctx, *, message=None):
-        if message:
-            try:
-                message = await commands.clean_content(use_nicknames=True).convert(ctx, message)
-                message = re.sub("<(?P<animated>a?):(?P<name>[a-zA-Z0-9_]{2,32}):(?P<id>[0-9]{18,22})>", "", message)
-                message = message.replace('@', '')
-                tts = gTTS(text=message, lang='it')
-                f = TemporaryFile()
-                tts.write_to_fp(f)
-                f.seek(0)  # file object
-                await ctx.send(file=discord.File(BytesIO(f.read()), filename='tts.mp3'))
-                f.close()
-            except:
-                await ctx.send('Cè qualcosa che non va...')
+    @commands.command(description='Mostra se un utente è dal cellulare')
+    async def mobile(self, ctx, member: discord.Member = None):
+        if member:
+            if member.is_on_mobile():
+                await ctx.send('Sì')
+            else:
+                await ctx.send('No')
         else:
-            await ctx.send('Esempio:\n tts Ciao CIRO')
+            if ctx.author.is_on_mobile():
+                await ctx.send('Sì')
+            else:
+                await ctx.send('No')
+
+    @commands.command(description='Mostra quali membri hanno quel ruolo (case-sensitive)')
+    async def cerca(self, ctx, *, arg=None):
+        try:
+            role = await RoleConverter().convert(ctx, arg)
+            paginator = commands.Paginator()
+            r = discord.utils.get(ctx.guild.roles, name=f'{role}')
+            res = ''
+            if str(r.members) != '[]':
+                res += f'Membri del ruolo "{role}" {len(r.members)}:\n'
+                for a in r.members:
+                    res += f"   {a}\n"
+            print(len(res))
+            if len(res) >= 2000:
+                data = bytes(res, 'utf-8')
+                async with aiohttp.ClientSession() as cs:
+                    async with cs.post('https://hastebin.com/documents', data=data) as r:
+                        res = await r.json()
+                        key = res["key"]
+                        return await ctx.send(f"https://hastebin.com/{key}")
+            if res != '':
+                try:
+                    paginator.add_line(res)
+                except:
+                    res = res.split("\n")
+                    for a in res:
+                        paginator.add_line(a)
+            for page in paginator.pages:
+                await ctx.send(page)
+                await asyncio.sleep(0.5)
+        except:
+            if arg:
+                paginator = commands.Paginator()
+                for roles in ctx.guild.roles:
+                    if arg in roles.name:
+                        if roles.name != '@everyone':
+                            r = discord.utils.get(ctx.guild.roles, name=f'{roles}')
+                            res = ''
+                            if str(r.members) != '[]':
+                                res += f'Membri del ruolo "{roles}" {len(r.members)}:\n'
+                                for a in r.members:
+                                    res += f"   {a}\n"
+                            print(len(res))
+                            if len(res) >= 2000:
+                                data = bytes(res, 'utf-8')
+                                async with aiohttp.ClientSession() as cs:
+                                    async with cs.post('https://hastebin.com/documents', data=data) as r:
+                                        res = await r.json()
+                                        key = res["key"]
+                                        return await ctx.send(f"https://hastebin.com/{key}")
+                            if res != '':
+                                try:
+                                    paginator.add_line(res)
+                                except:
+                                    res = res.split("\n")
+                                    for a in res:
+                                        paginator.add_line(a)
+                for page in paginator.pages:
+                    await ctx.send(page)
+                    await asyncio.sleep(0.5)
+                if not paginator.pages:
+                    await ctx.send('Non ho trovato nessun membro per quel ruolo o non ho trovato quel ruolo')
+            else:
+                paginator = commands.Paginator()
+                for roles in ctx.guild.roles:
+                    r = discord.utils.get(ctx.guild.roles, name=f'{roles}')
+                    res = ''
+                    if str(r.members) != '[]':
+                        res += f'Membri del ruolo "{roles}" {len(r.members)}:\n'
+                        for a in r.members:
+                            res += f"   {a}\n"
+                    print(len(res))
+                    if len(res) >= 2000:
+                        data = bytes(res, 'utf-8')
+                        async with aiohttp.ClientSession() as cs:
+                            async with cs.post('https://hastebin.com/documents', data=data) as r:
+                                res = await r.json()
+                                key = res["key"]
+                                return await ctx.send(f"https://hastebin.com/{key}")
+                    if res != '':
+                        try:
+                            paginator.add_line(res)
+                        except:
+                            res = res.split("\n")
+                            for a in res:
+                                paginator.add_line(a)
+                for page in paginator.pages:
+                    await ctx.send(page)
+                    await asyncio.sleep(0.5)
 
 
 def setup(bot):

@@ -4,6 +4,8 @@ import io
 import textwrap
 import traceback
 from contextlib import redirect_stdout
+
+import aiohttp
 import discord
 from discord.ext import commands
 
@@ -182,6 +184,41 @@ class owner(commands.Cog):
         await ctx.send("Riavvio in corso...")
         await self.bot.logout()
         os.system("python3 Ciro.py")
+
+    @commands.command(aliases=['up'], description='Carica un file nel server', hidden=True)
+    @commands.is_owner()
+    async def upload(self, ctx, *, arg=None):
+        if arg:
+            if '/' in arg:
+                if ctx.message.attachments:
+                    filename = ctx.message.attachments[0].filename
+                    attachment = ctx.message.attachments[0].url
+                    async with aiohttp.ClientSession() as session:
+                        async with session.get(attachment) as resp:
+                            file = await resp.read()
+                            try:
+                                with open(arg + filename, 'wb') as f:
+                                    f.write(file)
+                                    f.close()
+                            except FileNotFoundError:
+                                return await ctx.send('Cartalla inesistente')
+                    await ctx.send(f'✅: {arg + filename}')
+            else:
+                await ctx.send('cartella`/`')
+        else:
+            if ctx.message.attachments:
+                filename = ctx.message.attachments[0].filename
+                attachment = ctx.message.attachments[0].url
+                async with aiohttp.ClientSession() as session:
+                    async with session.get(attachment) as resp:
+                        file = await resp.read()
+                        try:
+                            with open('cogs/' + filename, 'wb') as f:
+                                f.write(file)
+                                f.close()
+                        except FileNotFoundError:
+                            return await ctx.send('Cartalla inesistente')
+                await ctx.send(f'✅: cogs/{filename}')
 
 
 def setup(bot):
