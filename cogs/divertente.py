@@ -1,3 +1,4 @@
+import aiohttp
 import discord
 from discord.ext import commands, tasks
 from data import skyshit24
@@ -36,6 +37,34 @@ class divertente(commands.Cog):
                 await ctx.send('Cè qualcosa che non va...')
         else:
             await ctx.send('Esempio:\n tts Ciao CIRO')
+
+    @commands.command(aliases=['trig', 'trigg', 'trigger'], description='Crea una gif triggered su un avatar')
+    async def triggered(self, ctx, *, member: discord.Member = None):
+        """Powered by <https://some-random-api.ml/>"""
+
+        async with ctx.typing():
+            member = member or ctx.author
+            url = "https://some-random-api.ml/canvas/triggered?avatar=" + str(member.avatar_url_as(format="png"))
+
+            async with aiohttp.ClientSession() as fy:
+                async with fy.get(url) as r:
+                    res = await r.read()
+
+            await ctx.send(file=discord.File(fp=BytesIO(res), filename=f"{member.display_name}.gif"))
+
+    @commands.command(description='Overlay WASTED di GTA su un avatar')
+    async def wasted(self, ctx, *, member: discord.Member = None):
+        """Powered by <https://some-random-api.ml/>"""
+
+        async with ctx.typing():
+            member = member or ctx.author
+            url = "https://some-random-api.ml/canvas/wasted?avatar=" + str(member.avatar_url_as(format="png"))
+
+            async with aiohttp.ClientSession() as fy:
+                async with fy.get(url) as r:
+                    res = await r.read()
+
+            await ctx.send(file=discord.File(fp=BytesIO(res), filename=f"{member.display_name}.png"))
 
 
 def setup(bot):

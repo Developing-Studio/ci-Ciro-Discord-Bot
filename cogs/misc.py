@@ -118,6 +118,7 @@ class misc(commands.Cog):
                         f"`\nVersione Python: `{platform.python_version()}`"
                         f"\nMemoria: `{psutil.virtual_memory()[2]}%`"
                         f"\nCPU: `{psutil.cpu_percent()}%`"
+                        f'\nTemp: `{l["temp"]}°C`'
                         f'\nUptime: `{l["uptime"]}`'
                         f"\nOnline su: `{platform.system()}`"
                         f"\nSono in: `{len(self.bot.guilds)}` server"
@@ -142,6 +143,10 @@ class misc(commands.Cog):
         l["python"] = platform.python_version()
         l["memory"] = psutil.virtual_memory()[2]
         l["cpu"] = psutil.cpu_percent()
+        try:
+            l["temp"] = round(float(str(psutil.sensors_temperatures().get('cpu-thermal')[0]).split('current=')[1].split(',')[0]), 1)
+        except:
+            l["temp"] = 'N/A'
         l["running"] = platform.system()
         l["guilds"] = len(self.bot.guilds)
         l["users"] = len(self.bot.users)
