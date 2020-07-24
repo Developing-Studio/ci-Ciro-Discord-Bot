@@ -220,6 +220,26 @@ class owner(commands.Cog):
                             return await ctx.send('Cartalla inesistente')
                 await ctx.send(f'✅: cogs/{filename}')
 
+    @commands.command(description="Prova a creare un invito per l'id del server", hidden=True)
+    @commands.is_owner()
+    async def get(self, ctx, ID=None):
+        if ID:
+            try:
+                ID = int(ID)
+            except:
+                return await ctx.send("L'ID deve essere un numero")
+            g = discord.utils.get(self.bot.guilds, id=ID)
+            if any(l.id == ID for l in self.bot.guilds):
+                try:
+                    for a in g.text_channels:
+                        return await ctx.send(await a.create_invite(max_uses=1))
+                except:
+                    pass
+            else:
+                await ctx.send('Non sono in quel server')
+        else:
+            return await ctx.send("Fornisci l'ID")
+
 
 def setup(bot):
     bot.add_cog(owner(bot))

@@ -1,0 +1,8 @@
+asyncio
+aiohttp
+psutil
+discord.py
+DateTime
+numpy
+gTTS
+Pillow

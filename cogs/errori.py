@@ -109,7 +109,7 @@ class errori(commands.Cog):
             await ctx.message.add_reaction('⏲')
         else:
             if not any(l in str(error) for l in self.ignore):
-                await self.bot.get_channel(714813858530721862).send(error)
+                await self.bot.get_channel(714813858530721862).send(f"`{ctx.guild.id}` > {error}")
 
 
 def setup(bot):
