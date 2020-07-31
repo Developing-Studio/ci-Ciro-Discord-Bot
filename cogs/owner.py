@@ -9,8 +9,6 @@ import aiohttp
 import discord
 from discord.ext import commands
 
-from Ciro import get_prefix_tx
-
 
 def cleanup_code(content):
     """Automatically removes code blocks from the code."""
@@ -145,10 +143,10 @@ class owner(commands.Cog):
         for x in self.bot.commands:
             if x.hidden:
                 if not x.description:
-                    embed.add_field(name=f"{get_prefix_tx(self.bot, message=ctx.message)}{x.name}", value=f'404',
+                    embed.add_field(name=f"{self.bot.command_prefix(self.bot, message=ctx.message)}{x.name}", value=f'404',
                                     inline=False)
                 else:
-                    embed.add_field(name=f"{get_prefix_tx(self.bot, message=ctx.message)}{x.name}",
+                    embed.add_field(name=f"{self.bot.command_prefix(self.bot, message=ctx.message)}{x.name}",
                                     value=f'```{x.description}```', inline=False)
 
         msg = await ctx.send(embed=embed)
@@ -183,17 +181,9 @@ class owner(commands.Cog):
     @commands.command(description='Riavvia il bot', hidden=True)
     @commands.is_owner()
     async def riavvia(self, ctx):
-        try:
-            if self.bot.rik == 0:
-                await ctx.send("Riavvio in corso...")
-                await self.bot.logout()
-                os.system("python3 Ciro.py")
-            else:
-                await ctx.send(f'Ci sono {self.bot.rik} processi ricordami attivi')
-        except:
-            await ctx.send("Riavvio in corso...")
-            await self.bot.logout()
-            os.system("python3 Ciro.py")
+        await ctx.send("Riavvio in corso...")
+        await self.bot.logout()
+        os.system("python3 Ciro.py")
 
     @commands.command(aliases=['up'], description='Carica un file nel server', hidden=True)
     @commands.is_owner()

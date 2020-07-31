@@ -6,4 +6,3 @@ DateTime
 numpy
 gTTS
 Pillow
-jishaku
