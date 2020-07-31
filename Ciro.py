@@ -3,6 +3,7 @@ import discord
 from discord.ext import commands
 import os
 import sys
+import jishaku
 
 #  #  #  REQUIREMENTS  #  #  #
 if not os.path.isdir('./data'):
@@ -29,28 +30,43 @@ if not os.path.isfile('./crash.0'):
 #  #  #  CHECK  #  #  #
 
 def get_prefix(bot, message):
+    if message.guild is None:
+        prefix = commands.when_mentioned_or("c- ", "c-")(bot, message)
+
+    else:
+        with open("data/prefixes.json", "r") as f:
+            json_prefixes = json.load(f)
+
+        try:
+            get = str(json_prefixes[str(message.guild.id)])
+            prefix = commands.when_mentioned_or(f"{get} ", get)(bot, message)
+
+        except KeyError:
+            prefix = commands.when_mentioned_or("c- ", "c-")(bot, message)
+
+    return prefix
+
+
+def get_prefix_tx(bot, message):
     with open("data/prefixes.json", "r") as f:
         prefixes = json.load(f)
     try:
         return prefixes[str(message.guild.id)]
     except KeyError:
-        prefixes[str(message.guild.id)] = 'c-'
-
-        with open('data/prefixes.json', 'w') as f:
-            json.dump(prefixes, f, indent=4)
-
-        return prefixes[str(message.guild.id)]
+        return 'c-'
 
 
 #  #  #  CHECK  #  #  #
 
-
+# bot = commands.AutoShardedBot(command_prefix = get_prefix, description = ".", case_insensitive=True) 
 bot = commands.Bot(command_prefix=get_prefix, case_insensitive=True)
 bot.remove_command('help')
 
 for filename in os.listdir('./cogs'):
     if filename.endswith('.py'):
         bot.load_extension(f'cogs.{filename[:-3]}')
+
+bot.load_extension('jishaku')
 
 
 @bot.event
