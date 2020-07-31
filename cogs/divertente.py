@@ -2,6 +2,8 @@ import unicodedata
 import aiohttp
 import discord
 from discord.ext import commands, tasks
+
+from Ciro import get_prefix_tx
 from data import skyshit24
 from gtts import gTTS
 import re
@@ -146,7 +148,7 @@ class divertente(commands.Cog):
             except:
                 await ctx.send('Cè qualcosa che non va...')
         else:
-            await ctx.send('Esempio:\n tts Ciao CIRO')
+            await ctx.send(f'Esempio:\n{get_prefix_tx(self.bot, message=ctx.message)}tts Ciao CIRO')
 
     @commands.command(aliases=['trig', 'trigg', 'trigger'], description='Crea una gif triggered su un avatar')
     async def triggered(self, ctx, *, member: discord.Member = None):
