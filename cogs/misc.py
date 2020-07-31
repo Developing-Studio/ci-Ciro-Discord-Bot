@@ -9,6 +9,7 @@ import psutil
 import discord
 from discord.ext import commands, tasks
 from discord.ext.commands import RoleConverter
+from Ciro import get_prefix_tx
 
 
 class misc(commands.Cog):
@@ -76,7 +77,7 @@ class misc(commands.Cog):
                                 generale += f"Modulo : {x[:-3]}\n{value}"
                             except:
                                 pass
-                generale += f'```\n\nPer maggiori informazioni scrivi:\nhelp `nome comando`\n\nSTAI VISUALIZZANDO IL FORMATO SENZA EMBED!\nUSA IL COMANDO `{self.bot.command_prefix(self.bot, message=ctx.message)}setup` per maggiori info'
+                generale += f'```\n\nPer maggiori informazioni scrivi:\nhelp `nome comando`\n\nSTAI VISUALIZZANDO IL FORMATO SENZA EMBED!\nUSA IL COMANDO `{get_prefix_tx(self.bot, message=ctx.message)}setup` per maggiori info'
                 await ctx.send(generale)
             else:
                 raw_comando = self.bot.get_command(comando)
@@ -188,7 +189,7 @@ class misc(commands.Cog):
             await ctx.send('feedback inviato.')
         else:
             await ctx.send(
-                f'Esempio:\n{self.bot.command_prefix(self.bot, message=ctx.message)}feedback Aggiungi un sasso')
+                f'Esempio:\n{get_prefix_tx(self.bot, message=ctx.message)}feedback Aggiungi un sasso')
 
     @commands.command(description='Mostra se un utente è dal cellulare')
     async def mobile(self, ctx, member: discord.Member = None):
