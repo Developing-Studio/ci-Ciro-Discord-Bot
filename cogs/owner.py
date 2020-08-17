@@ -1,3 +1,4 @@
+import inspect
 import json
 import os
 import io
@@ -20,6 +21,14 @@ def cleanup_code(content):
 
     # remove `foo`
     return content.strip('` \n')
+
+
+async def mystbin(data):
+    data = bytes(str(data), 'utf-8')
+    async with aiohttp.ClientSession() as cs:
+        async with cs.post('https://mystb.in/documents', data=data) as r:
+            res = await r.json()
+            return f'https://mystb.in/{res["key"]}.python'
 
 
 class owner(commands.Cog):
@@ -249,6 +258,31 @@ class owner(commands.Cog):
                 await ctx.send('Non sono in quel server')
         else:
             return await ctx.send("Fornisci l'ID")
+
+    @commands.is_owner()
+    @commands.command(description='send github-source-link', hidden=True)
+    async def github(self, ctx):
+        await ctx.send('<https://github.com/ITKewai/Ciro-Discord-Bot>')
+
+    @commands.is_owner()
+    @commands.command(description='send source-link', hidden=True)
+    async def source(self, ctx, *, command):
+        cmd = self.bot.get_command(command)
+        if not cmd:
+            emb = discord.Embed(description=f"<:PepeKMS:719317573493194883> | Commando **{command}** non trovato.",
+                                colour=discord.Colour.red())
+            return await ctx.send(embed=emb)
+
+        try:
+            source_lines, _ = inspect.getsourcelines(cmd.callback)
+        except (TypeError, OSError):
+            emb = discord.Embed(description=f"<:PepeKMS:719317573493194883> | Non riesco a prendere la sorgente di **{command}**.",
+                                colour=discord.Colour.red())
+            return await ctx.send(embed=emb)
+
+        source_lines_ = ''.join(source_lines)
+
+        await ctx.send(await mystbin(source_lines_))
 
 
 def setup(bot):

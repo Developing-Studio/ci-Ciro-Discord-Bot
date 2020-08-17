@@ -145,7 +145,8 @@ class misc(commands.Cog):
         l["memory"] = psutil.virtual_memory()[2]
         l["cpu"] = psutil.cpu_percent()
         try:
-            l["temp"] = round(float(str(psutil.sensors_temperatures().get('cpu-thermal')[0]).split('current=')[1].split(',')[0]), 1)
+            l["temp"] = round(
+                float(str(psutil.sensors_temperatures().get('cpu-thermal')[0]).split('current=')[1].split(',')[0]), 1)
         except:
             l["temp"] = 'N/A'
         l["running"] = platform.system()
@@ -160,7 +161,27 @@ class misc(commands.Cog):
                     invoke_without_command=True)
     @commands.has_permissions(manage_guild=True)
     async def prefisso(self, ctx, prefisso: str = None):
-        if prefisso:
+        deny = ["<@", '@here', '@everyone', '<#']
+
+        if prefisso == 'reset':
+
+            with open('data/prefixes.json', 'r') as f:
+                prefixes = json.load(f)
+
+            prefixes[str(ctx.guild.id)] = 'c-'
+
+            with open('data/prefixes.json', 'w') as f:
+                json.dump(prefixes, f, indent=4)
+
+            await ctx.send(f'Ho ripristinato il prefisso di questo server in `c-`')
+
+        elif prefisso and any(foo in prefisso for foo in deny) if prefisso else None is True:
+
+            embed = discord.Embed(title=f"⚠ | Non è possibile utilizzare menzioni o canali come prefisso",
+                                  colour=discord.Colour.red())
+            await ctx.send(embed=embed)
+
+        elif prefisso:
             with open('data/prefixes.json', 'r') as f:
                 prefixes = json.load(f)
 
@@ -170,8 +191,10 @@ class misc(commands.Cog):
                 json.dump(prefixes, f, indent=4)
 
             await ctx.send(f'Ho cambiato il prefisso di questo server in `{prefisso}`')
+
         else:
-            embed = discord.Embed(title="", colour=discord.Colour.red())
+            embed = discord.Embed(title=f"Il prefisso attuale è:    {get_prefix_tx(self.bot, message=ctx.message)}",
+                                  colour=discord.Colour.red())
             embed.add_field(name="⚠ | Questo comando modifica il prefisso in questo server",
                             value='```Esempio:\nprefisso *\n```', inline=False)
             await ctx.send(embed=embed)

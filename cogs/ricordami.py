@@ -12,7 +12,7 @@ class ricordami(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.bot.rik = 0
-        locale.setlocale(locale.LC_ALL, 'it_IT')
+        locale.setlocale(locale.LC_ALL, 'it_IT.utf8')
 
     @commands.bot_has_permissions(embed_links=True)
     @commands.command(aliasas=['promemoria'], description='Ti ricorda di fare qualcosa dopo un lasso di tempo')
