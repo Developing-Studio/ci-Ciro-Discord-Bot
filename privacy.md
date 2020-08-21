@@ -7,7 +7,7 @@
 ##### Server IDs: We store these to keep server configurations and suggestions tied to their respective servers
 <!---##### Webhook URLs: We store these to ensure logging through webhooks works - only one URL is stored which is the URL of the webhook created by the bot when logging is configured.--->
 <!---##### Server Emotes: We store server emote names/IDs if a server configures an emote as a reaction emote in the suggestion feed--->
-##### Submitted Suggestions/Comments/Message: We store message content submitted as suggestions and comments in order for the bot to have data about each suggestion or use--->
+##### Submitted Suggestions/Comments/Message: We store message content submitted as suggestions and comments in order for the bot to have data about each suggestion or use
 <!---##### Attachment URLs: We store URLs of files attached to suggestions in order to make the attaching feature possible.--->
 ##### We log commands used and servers the bot is added to/removed from for analytical purposes.
 
