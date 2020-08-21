@@ -107,6 +107,14 @@ class errori(commands.Cog):
                 return
             await ctx.message.add_reaction('❌')
             await ctx.message.add_reaction('⏲')
+        elif isinstance(error, commands.BadArgument) and 'Member "' in error.args[0]:
+            try:
+                embed = discord.Embed(title=f"""Membro del server `{error.args[0].split('"')[1]}` non trovato""",
+                                      colour=discord.Colour.red())
+                await ctx.send(embed=embed)
+            except:
+                await ctx.send(f"""Membro {error.args[0].split('"')[1]} non trovato""")
+
         else:
             if not any(l in str(error) for l in self.ignore):
                 await self.bot.get_channel(714813858530721862).send(f"`{ctx.guild.id}` > {error}")

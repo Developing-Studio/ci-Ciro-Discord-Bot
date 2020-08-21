@@ -107,7 +107,7 @@ class misc(commands.Cog):
                             title="Pong!")
         await msg.edit(embed=emb, content=None)
 
-    @commands.command(aliases=["stats", "uptime", "about", 'invite', 'invita'],
+    @commands.command(aliases=["stats", "uptime", "about", 'invite', 'invita', 'policy', 'privacy'],
                       description='Mostra le statistiche del bot e link utili')
     @commands.bot_has_permissions(embed_links=True)
     async def online(self, ctx):
@@ -125,7 +125,8 @@ class misc(commands.Cog):
                         f"\nSono in: `{len(self.bot.guilds)}` server"
                         f"\nUtenti: `{len(self.bot.users)}`"
                         f"\nInvitami nel tuo server: [clicca qui](https://discord.com/oauth2/authorize?client_id=714798417746067547&permissions=0&scope=bot)"
-                        f"\nEntra nel server di <@714798417746067547>: [clicca qui](https://discord.gg/Ck5rBtS)**",
+                        f"\nEntra nel server di <@714798417746067547>: [clicca qui](https://discord.gg/Ck5rBtS)**"
+                        f"\nPrivacy Policy: [clicca qui](https://github.com/ITKewai/Ciro-Discord-Bot/blob/master/privacy.md)**",
             colour=discord.Colour.gold())
 
         await ctx.send(embed=emb)

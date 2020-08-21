@@ -12,3 +12,6 @@ data/skyshit24.py
 *.ttf
 cogs/TopGG.py
 cogs/botserver.py
+data/config.py
+cogs/LOG_DB.py
+cogs/RTFM_API.py

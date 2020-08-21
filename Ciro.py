@@ -93,7 +93,7 @@ async def on_guild_join(guild):
 
     ch = bot.get_channel(715151965713072180)
     emb = discord.Embed(
-        description=f"<a:YAAY:715156619842814023>\n{bot.user.mention} si è unito al server **{guild.name}**\n proprieatario del server :  **{guild.owner}**\n Membri nel server : **{guild.member_count}**",
+        description=f"<a:YAAY:715156619842814023>\n{bot.user.mention} si è unito al server **{guild.name}**\n proprieatario del server :  **{guild.owner}**\n Membri nel server : **{guild.member_count}**\nID: **{guild.id}**",
         colour=discord.Colour.green())
     emb.set_footer(text=f"sono online in {len(bot.guilds)} server", icon_url=bot.user.avatar_url)
     emb.set_thumbnail(url=guild.icon_url)

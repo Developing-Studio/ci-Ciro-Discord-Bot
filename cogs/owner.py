@@ -7,6 +7,7 @@ import traceback
 from contextlib import redirect_stdout
 
 import aiohttp
+import asyncio
 import discord
 from discord.ext import commands
 
@@ -43,7 +44,9 @@ class owner(commands.Cog):
         if body:
             if ctx.author.id == 323058900771536898:
                 env = {
+
                     'bot': self.bot,
+                    'self': self,
                     'ctx': ctx,
                     'channel': ctx.channel,
                     'author': ctx.author,
