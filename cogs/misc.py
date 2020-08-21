@@ -217,16 +217,13 @@ class misc(commands.Cog):
 
     @commands.command(description='Mostra se un utente è dal cellulare')
     async def mobile(self, ctx, member: discord.Member = None):
-        if member:
-            if member.is_on_mobile():
-                await ctx.send('Sì')
-            else:
-                await ctx.send('No')
+
+        member = member or ctx.author 
+
+        if member.is_on_mobile():
+            await ctx.send('Sì')
         else:
-            if ctx.author.is_on_mobile():
-                await ctx.send('Sì')
-            else:
-                await ctx.send('No')
+            await ctx.send('No')
 
     @commands.command(description='Mostra quali membri hanno quel ruolo (case-sensitive)')
     async def cerca(self, ctx, *, arg=None):

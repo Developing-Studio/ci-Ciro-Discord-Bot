@@ -59,7 +59,7 @@ def get_prefix_tx(bot, message):
 #  #  #  CHECK  #  #  #
 
 # bot = commands.AutoShardedBot(command_prefix = get_prefix, description = ".", case_insensitive=True) 
-bot = commands.Bot(command_prefix=get_prefix, case_insensitive=True)
+bot = commands.Bot(command_prefix=get_prefix, case_insensitive=True, allowed_mentions = discord.AllowedMentions(everyone = False, roles = False))
 bot.remove_command('help')
 
 for filename in os.listdir('./cogs'):
@@ -67,7 +67,6 @@ for filename in os.listdir('./cogs'):
         bot.load_extension(f'cogs.{filename[:-3]}')
 
 bot.load_extension('jishaku')
-
 
 @bot.event
 async def on_ready():
