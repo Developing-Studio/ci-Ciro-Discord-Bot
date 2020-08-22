@@ -1,14 +1,16 @@
+import os
 import unicodedata
 import aiohttp
 import discord
 from discord.ext import commands, tasks
-
+import gtts
+from pydub import AudioSegment
 from Ciro import get_prefix_tx
 from data import skyshit24
 from gtts import gTTS
 import re
 from io import BytesIO
-from tempfile import TemporaryFile
+from tempfile import TemporaryFile, NamedTemporaryFile
 from PIL import Image, ImageFilter, ImageDraw, ImageFont
 import numpy as np
 
@@ -135,18 +137,44 @@ class divertente(commands.Cog):
     @commands.command(description='Invia un file mp3 con il testo che hai scritto')
     async def tts(self, ctx, *, message=None):
         if message:
+            message = await commands.clean_content(use_nicknames=True).convert(ctx, message)
+            message = re.sub("<(?P<animated>a?):(?P<name>[a-zA-Z0-9_]{2,32}):(?P<id>[0-9]{18,22})>", "", message)
+            message = message.replace('@', '')
             try:
-                message = await commands.clean_content(use_nicknames=True).convert(ctx, message)
-                message = re.sub("<(?P<animated>a?):(?P<name>[a-zA-Z0-9_]{2,32}):(?P<id>[0-9]{18,22})>", "", message)
-                message = message.replace('@', '')
-                tts = gTTS(text=message, lang='it')
-                f = TemporaryFile()
-                tts.write_to_fp(f)
-                f.seek(0)  # file object
-                await ctx.send(file=discord.File(BytesIO(f.read()), filename='tts.mp3'))
-                f.close()
+                headers = {
+                    'user-agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/59.0.3071.115 Safari/537.36'}
+                async with aiohttp.ClientSession(headers=headers) as session:
+                    url = "https://us-central1-sunlit-context-217400.cloudfunctions.net/streamlabs-tts"
+                    data = {'text': message, 'voice': 'Giorgio'}
+                    test = await session.post(url, data=data)
+                    test = await test.json()
+                    resp = await session.get('https' + test["speak_url"].split("https", 1)[1])
+                    if resp.status == 200:
+                        f = NamedTemporaryFile(delete=False)
+                        f.write(await resp.read())
+                        f.seek(0)
+                        locashion = f.name.replace('\\', '/')
+                        file_name = locashion.split('/')[-1]
+                        f.close()
+                        audio = AudioSegment.from_file_using_temporary_files(locashion, format="ogg")
+
+                        file = audio.export(f"./{file_name}.mp3", format="mp3")
+                        await ctx.send(file=discord.File(BytesIO(file.read()), filename='tts1.mp3'))
+                        file.close()
+                        os.remove(f'./{file_name}.mp3')
+
+                        os.remove(locashion)
             except:
-                await ctx.send('Cè qualcosa che non va...')
+                try:
+                    tts = gTTS(text=message, lang='it')
+                    f = TemporaryFile()
+                    tts.write_to_fp(f)
+                    f.seek(0)  # file object
+                    await ctx.send(file=discord.File(BytesIO(f.read()), filename='tts.mp3'))
+                    f.close()
+                except:
+                    await ctx.send('Cè qualcosa che non va...')
+
         else:
             await ctx.send(f'Esempio:\n{get_prefix_tx(self.bot, message=ctx.message)}tts Ciao CIRO')
 
