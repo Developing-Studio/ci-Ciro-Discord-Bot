@@ -209,6 +209,7 @@ class misc(commands.Cog):
         if message:
             embed = discord.Embed(title="", colour=discord.Colour.blue())
             embed.add_field(name=ctx.author, value=f'```{message}```', inline=False)
+            embed.set_footer(text=f'{ctx.guild.id} - {ctx.channel.name}')
             await self.bot.get_channel(715194608870752286).send(embed=embed)
             await ctx.send('feedback inviato.')
         else:

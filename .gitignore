@@ -15,3 +15,5 @@ cogs/botserver.py
 data/config.py
 cogs/LOG_DB.py
 cogs/RTFM_API.py
+/requirements_private.txt
+data/blacklist.json
