@@ -31,8 +31,7 @@ class DM(commands.Cog):
                     category = discord.utils.get(self.bot.get_guild(self.BOT_GUILD_FOR_DM).categories, name=self.CATEGORY_NAME_FOR_DM)
 
                     channel = await self.bot.get_guild(self.BOT_GUILD_FOR_DM).create_text_channel(f'{message.author.id}', overwrites=overwrites, category=category, topic=f'{message.author.name}')
-                    member = message.author
-                    await channel.send(f"> `ok{message.author}`\n{message.content}")
+                    await channel.send(f"> `{message.author}`\n{message.content}")
                 elif discord.utils.get(self.bot.get_guild(self.BOT_GUILD_FOR_DM).channels, name=f'{message.author.id}'):
                     channel = discord.utils.get(self.bot.get_guild(self.BOT_GUILD_FOR_DM).channels, name=f'{message.author.id}')
                     await channel.send(f"> `{message.author}`\n{message.content}")
