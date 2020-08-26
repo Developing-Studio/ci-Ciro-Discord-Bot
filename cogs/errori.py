@@ -1,3 +1,4 @@
+import json
 import discord
 from discord.ext import commands
 
@@ -6,8 +7,7 @@ class errori(commands.Cog):
 
     def __init__(self, bot):
         self.bot = bot
-        self.ignore = ('vol', 'tra', 'equalizer')
-        # self.bot.owner_id = 323058900771536898  # se non è in un team
+        self.ignore = ('vol', 'tra', 'equalizer', 'appeal_reason')
 
     @commands.command(description='Effettua il check dei permessi del bot')
     @commands.bot_has_permissions(manage_messages=True, attach_files=True, embed_links=True)
@@ -99,7 +99,14 @@ class errori(commands.Cog):
             embed.add_field(name="⚠ | Ti mancano i seguenti permessi:", value=f'```{ita}```', inline=False)
             await ctx.send(embed=embed)
         elif isinstance(error, commands.CheckFailure):
-            await ctx.send('Non sei il proprietario del bot')
+            if str(error) == 'blacklist':
+                embed = discord.Embed(title="", colour=discord.Colour.red())
+                embed.add_field(name="⚠ | SEI FINITO NELLA BLACKLIST:",
+                                value='```Tutti i comandi per te sono disabiliati.\nSe ci sei finito per errore usa il comando:\nappeal```',
+                                inline=False)
+                await ctx.send(embed=embed)
+            else:
+                await ctx.send('Non sei il proprietario del bot')
         elif isinstance(error, commands.errors.CommandOnCooldown):
             if ctx.author.id in self.bot.owner_ids:
                 await ctx.message.add_reaction('🔥')
@@ -114,7 +121,13 @@ class errori(commands.Cog):
                 await ctx.send(embed=embed)
             except:
                 await ctx.send(f"""Membro {error.args[0].split('"')[1]} non trovato""")
-
+        elif isinstance(error, commands.BadArgument) and 'User "' in error.args[0]:
+            try:
+                embed = discord.Embed(title=f"""Utente `{error.args[0].split('"')[1]}` non trovato""",
+                                      colour=discord.Colour.red())
+                await ctx.send(embed=embed)
+            except:
+                await ctx.send(f"""Membro {error.args[0].split('"')[1]} non trovato""")
         else:
             if not any(l in str(error) for l in self.ignore):
                 await self.bot.get_channel(714813858530721862).send(f"`{ctx.guild.id}` > {error}")

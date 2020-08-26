@@ -3,7 +3,6 @@ import unicodedata
 import aiohttp
 import discord
 from discord.ext import commands, tasks
-import gtts
 from pydub import AudioSegment
 from Ciro import get_prefix_tx
 from data import skyshit24
