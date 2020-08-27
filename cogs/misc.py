@@ -147,7 +147,7 @@ class misc(commands.Cog):
         l["cpu"] = psutil.cpu_percent()
         try:
             l["temp"] = round(
-                float(str(psutil.sensors_temperatures().get('cpu-thermal')[0]).split('current=')[1].split(',')[0]), 1)
+                float(str(psutil.sensors_temperatures().get('cpu_thermal')[0]).split('current=')[1].split(',')[0]), 1)
         except:
             l["temp"] = 'N/A'
         l["running"] = platform.system()
