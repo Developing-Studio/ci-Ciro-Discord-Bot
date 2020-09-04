@@ -5,6 +5,10 @@ import discord
 from discord.ext import commands, tasks
 from pydub import AudioSegment
 from Ciro import get_prefix_tx
+try:
+    from cogs.LOG_DB import sql_Error
+except:
+    pass
 from data import skyshit24
 from gtts import gTTS
 import re
@@ -136,12 +140,12 @@ class divertente(commands.Cog):
     @commands.command(description='Invia un file mp3 con il testo che hai scritto')
     async def tts(self, ctx, *, message=None):
         if message:
+            await ctx.trigger_typing()
             message = await commands.clean_content(use_nicknames=True).convert(ctx, message)
             message = re.sub("<(?P<animated>a?):(?P<name>[a-zA-Z0-9_]{2,32}):(?P<id>[0-9]{18,22})>", "", message)
             message = message.replace('@', '')
             try:
-                headers = {
-                    'user-agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/59.0.3071.115 Safari/537.36'}
+                headers = {'user-agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/59.0.3071.115 Safari/537.36'}
                 async with aiohttp.ClientSession(headers=headers) as session:
                     url = "https://us-central1-sunlit-context-217400.cloudfunctions.net/streamlabs-tts"
                     data = {'text': message, 'voice': 'Giorgio'}
@@ -158,18 +162,22 @@ class divertente(commands.Cog):
                         audio = AudioSegment.from_file_using_temporary_files(locashion, format="ogg")
 
                         file = audio.export(f"./{file_name}.mp3", format="mp3")
-                        await ctx.send(file=discord.File(BytesIO(file.read()), filename='tts1.mp3'))
+                        await ctx.send('Voce di Giorgio', file=discord.File(BytesIO(file.read()), filename='output.mp3'))
                         file.close()
                         os.remove(f'./{file_name}.mp3')
 
                         os.remove(locashion)
-            except:
+            except Exception as error:
+                try:
+                    await sql_Error(error=error, bot=self.bot)
+                except:
+                    pass
                 try:
                     tts = gTTS(text=message, lang='it')
                     f = TemporaryFile()
                     tts.write_to_fp(f)
                     f.seek(0)  # file object
-                    await ctx.send(file=discord.File(BytesIO(f.read()), filename='tts.mp3'))
+                    await ctx.send('Voce di giorgio attualmente non disponible', file=discord.File(BytesIO(f.read()), filename='output.mp3'))
                     f.close()
                 except:
                     await ctx.send('Cè qualcosa che non va...')

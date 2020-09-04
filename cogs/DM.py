@@ -1,5 +1,21 @@
+from io import BytesIO
+
+import aiohttp
 import discord
 from discord.ext import commands
+
+
+async def send_message(channel, message):
+    if message.attachments:
+        filename = message.attachments[0].filename
+        attachment = message.attachments[0].url
+        async with aiohttp.ClientSession() as session:
+            async with session.get(attachment) as resp:
+                image_bytes = await resp.read()
+        file = discord.File(BytesIO(image_bytes), filename=filename)
+        await channel.send(f'> `{message.author}`\n{message.content}', file=file)
+    else:
+        await channel.send(f'> `{message.author}`\n{message.content}')
 
 
 class DM(commands.Cog):
@@ -31,14 +47,14 @@ class DM(commands.Cog):
                     category = discord.utils.get(self.bot.get_guild(self.BOT_GUILD_FOR_DM).categories, name=self.CATEGORY_NAME_FOR_DM)
 
                     channel = await self.bot.get_guild(self.BOT_GUILD_FOR_DM).create_text_channel(f'{message.author.id}', overwrites=overwrites, category=category, topic=f'{message.author.name}')
-                    await channel.send(f"> `{message.author}`\n{message.content}")
+                    await send_message(channel, message)
                 elif discord.utils.get(self.bot.get_guild(self.BOT_GUILD_FOR_DM).channels, name=f'{message.author.id}'):
                     channel = discord.utils.get(self.bot.get_guild(self.BOT_GUILD_FOR_DM).channels, name=f'{message.author.id}')
-                    await channel.send(f"> `{message.author}`\n{message.content}")
+                    await send_message(channel, message)
             elif str(message.channel.category) == self.CATEGORY_NAME_FOR_DM:
                 try:
                     channel = self.bot.get_user(int(message.channel.name))
-                    await channel.send(f"> `{message.author}`\n{message.content}")
+                    await send_message(channel, message)
                 except discord.Forbidden or AttributeError:
                     await message.channel.send('`Non ho più contatti con questo utente` O `L\' utente blocca i messaggi privati`')
 
