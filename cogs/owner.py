@@ -93,7 +93,7 @@ class owner(commands.Cog):
     @commands.command(description='Carica l’estensione', hidden=True)
     @commands.is_owner()
     async def load(self, ctx,  *, extension):
-        for extension in extension:
+        for extension in extension.split(' '):
             try:
                 self.bot.load_extension(f'cogs.{extension}')
 
@@ -104,26 +104,28 @@ class owner(commands.Cog):
 
     @commands.command(description='Disabilita l’estensione', hidden=True)
     @commands.is_owner()
-    async def unload(self, ctx,  extension):
-        try:
-            self.bot.unload_extension(f'cogs.{extension}')
+    async def unload(self, ctx, *, extension):
+        for extension in extension.split(' '):
+            try:
+                self.bot.unload_extension(f'cogs.{extension}')
 
-            await ctx.message.add_reaction("✅")
-        except Exception as e:
-            await ctx.message.add_reaction("❌")
-            await self.bot.get_channel(714813858530721862).send(str(e))
+                await ctx.message.add_reaction("✅")
+            except Exception as e:
+                await ctx.message.add_reaction("❌")
+                await self.bot.get_channel(714813858530721862).send(str(e))
 
     @commands.command(description='Ricarica l’estensione', hidden=True)
     @commands.is_owner()
-    async def reload(self, ctx, extension):
-        try:
-            self.bot.unload_extension(f'cogs.{extension}')
-            self.bot.load_extension(f'cogs.{extension}')
+    async def reload(self, ctx, *, extension):
+        for extension in extension.split(' '):
+            try:
+                self.bot.unload_extension(f'cogs.{extension}')
+                self.bot.load_extension(f'cogs.{extension}')
 
-            await ctx.message.add_reaction("✅")
-        except Exception as e:
-            await ctx.message.add_reaction("❌")
-            await self.bot.get_channel(714813858530721862).send(str(e))
+                await ctx.message.add_reaction("✅")
+            except Exception as e:
+                await ctx.message.add_reaction("❌")
+                await self.bot.get_channel(714813858530721862).send(str(e))
 
     @commands.command(description='Mostra i cogs', hidden=True)
     @commands.is_owner()
