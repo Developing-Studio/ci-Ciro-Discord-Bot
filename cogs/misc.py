@@ -200,6 +200,14 @@ class misc(commands.Cog):
                             value='```Esempio:\nprefisso *\n```', inline=False)
             await ctx.send(embed=embed)
 
+    @commands.Cog.listener()
+    async def on_message(self, message):
+        if len(message.mentions) == 1 and message.mentions[0].id == self.bot.user.id and len(message.content.split(" ")) == 1:
+            if message.channel != discord.channel.DMChannel:
+                embed = discord.Embed(title=f"Il prefisso di questo server è:    {get_prefix_tx(self.bot, message=message)}",
+                                      colour=discord.Colour.red())
+                await message.channel.send(embed=embed)
+
     @commands.command(aliases=['vote', 'voto'], description='Mostra il link per votare il bot')
     async def vota(self, ctx):
         await ctx.send('https://top.gg/bot/714798417746067547/vote')

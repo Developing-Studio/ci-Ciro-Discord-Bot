@@ -92,14 +92,15 @@ class owner(commands.Cog):
 
     @commands.command(description='Carica l’estensione', hidden=True)
     @commands.is_owner()
-    async def load(self, ctx,  extension):
-        try:
-            self.bot.load_extension(f'cogs.{extension}')
+    async def load(self, ctx,  *, extension):
+        for extension in extension:
+            try:
+                self.bot.load_extension(f'cogs.{extension}')
 
-            await ctx.message.add_reaction("✅")
-        except Exception as e:
-            await ctx.message.add_reaction("❌")
-            await self.bot.get_channel(714813858530721862).send(str(e))
+                await ctx.message.add_reaction("✅")
+            except Exception as e:
+                await ctx.message.add_reaction("❌")
+                await self.bot.get_channel(714813858530721862).send(str(e))
 
     @commands.command(description='Disabilita l’estensione', hidden=True)
     @commands.is_owner()
