@@ -235,7 +235,7 @@ class misc(commands.Cog):
             await ctx.send('No')
 
     @commands.command(description='Mostra quali membri hanno quel ruolo (case-sensitive)')
-    async def cerca(self, ctx, *, arg=None):
+    async def ruoli(self, ctx, *, arg=None):
         try:
             role = await RoleConverter().convert(ctx, arg)
             paginator = commands.Paginator()
@@ -323,6 +323,103 @@ class misc(commands.Cog):
                     await ctx.send(page)
                     await asyncio.sleep(0.5)
 
+    @commands.command(description='Mostra quali membri hanno quel ruolo (case-sensitive)')
+    async def membro(self, ctx, *, arg=None):
+        paginator = commands.Paginator()
+        r = [str(x) for x in ctx.guild.members if arg in str(x)]
+        res = ''
+        if str(r) != '[]':
+            res += f'Membri con il nome "{arg}" {len(r)}:\n'
+            for a in r:
+                res += f"   {a}\n"
+        # print(len(res))
+            if len(res) >= 2000:
+                data = bytes(res, 'utf-8')
+                async with aiohttp.ClientSession() as cs:
+                    async with cs.post('https://hastebin.com/documents', data=data) as r:
+                        res = await r.json()
+                        key = res["key"]
+                        return await ctx.send(f"https://hastebin.com/{key}")
+            if res != '':
+                try:
+                    paginator.add_line(res)
+                except:
+                    res = res.split("\n")
+                    for a in res:
+                        paginator.add_line(a)
+            for page in paginator.pages:
+                await ctx.send(page)
+                await asyncio.sleep(0.5)
+        else:
+            await ctx.send('Non ho trovato nessun membro per quel nome. Ricorda che la ricerca è case-sensitive')
+
+    @commands.command(aliases=["nickname"], description='Mostra quali membri hanno quel ruolo (case-sensitive)')
+    async def nick(self, ctx, *, arg=None):
+        paginator = commands.Paginator()
+        r = [str(x) for x in ctx.guild.members if arg in str(x)]
+        res = ''
+        if str(r) != '[]':
+            res += f'Membri con il nome "{arg}" {len(r)}:\n'
+            for a in r:
+                res += f"   {a}\n"
+        # print(len(res))
+            if len(res) >= 2000:
+                data = bytes(res, 'utf-8')
+                async with aiohttp.ClientSession() as cs:
+                    async with cs.post('https://hastebin.com/documents', data=data) as r:
+                        res = await r.json()
+                        key = res["key"]
+                        return await ctx.send(f"https://hastebin.com/{key}")
+            if res != '':
+                try:
+                    paginator.add_line(res)
+                except:
+                    res = res.split("\n")
+                    for a in res:
+                        paginator.add_line(a)
+            for page in paginator.pages:
+                await ctx.send(page)
+                await asyncio.sleep(0.5)
+        else:
+            await ctx.send('Non ho trovato nessun membro per quel nome. Ricorda che la ricerca è case-sensitive')
+
+    @commands.command(description='Mostra quale brano Spotify stai ascoltando')
+    async def spotify(self, ctx, *, member: discord.Member = None):
+        member = member or ctx.author
+
+        error = discord.Embed(description=f"⚠  | Non rilevo nessuna attività di  **Spotify**, assicurati "
+                                          f"che sia collegato al tuo account discord",colour=discord.Colour.red())
+
+        if not member.activity:
+            return await ctx.send(embed=error)
+
+        for a in member.activities:
+            if a.name == "Spotify":
+                if a.type == discord.ActivityType.listening:
+                    title = a.title
+                    image = a.album_cover_url
+                    try:
+                        durata = str(a.duration)[:-7]
+                    except:
+                        pass
+                    url = "https://open.spotify.com/track/" + a.track_id
+                    colour = a.colour
+                    artists = " | ".join(a.artists)
+                    album = a.album
+
+                    emb = discord.Embed(colour=colour)
+                    emb.add_field(name="Titolo", value=f"[{title}]({url})", inline=False)
+                    emb.add_field(name="Artisti", value=artists, inline=False)
+                    emb.add_field(name="Album", value=album, inline=False)
+
+                    if durata:
+                        emb.add_field(name="Durata", value=durata, inline=False)
+
+                    emb.set_image(url=image)
+                    emb.set_author(name=member, icon_url=member.avatar_url, url=url)
+                    return await ctx.send(embed=emb)
+
+        await ctx.send(embed=error)
 
 def setup(bot):
     bot.add_cog(misc(bot))

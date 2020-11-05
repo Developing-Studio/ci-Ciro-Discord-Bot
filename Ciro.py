@@ -57,10 +57,12 @@ def get_prefix_tx(bot, message):
 
 
 #  #  #  CHECK  #  #  #
-
-# bot = commands.AutoShardedBot(command_prefix = get_prefix, description = ".", case_insensitive=True) 
+intents = discord.Intents.default()
+intents.members = True  # Subscribe to the privileged members intent.
+intents.presences = True  # Subscribe to the privileged members intent.
+# bot = commands.AutoShardedBot(command_prefix = get_prefix, description = ".", case_insensitive=True)
 bot = commands.Bot(command_prefix=get_prefix, case_insensitive=True,
-                   allowed_mentions=discord.AllowedMentions(everyone=False, roles=False))
+                   allowed_mentions=discord.AllowedMentions(everyone=False, roles=False), intents=intents)
 bot.remove_command('help')
 
 for filename in os.listdir('./cogs'):
@@ -80,8 +82,6 @@ async def on_ready():
 
 
 #  #  #  EVENTS  #  #  #
-
-
 @bot.event
 async def on_guild_join(guild):
     with open('data/prefixes.json', 'r') as f:
