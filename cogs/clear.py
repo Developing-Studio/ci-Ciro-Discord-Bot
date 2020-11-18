@@ -1,5 +1,6 @@
 import discord
 from discord.ext import commands
+from discord.ext.commands.cooldowns import BucketType
 
 
 class clear(commands.Cog):
@@ -8,7 +9,7 @@ class clear(commands.Cog):
         self.bot = bot
 
     @commands.group(aliases=['clear'], description='Cancella messaggi nella chat', invoke_without_command=True)
-    @commands.bot_has_permissions(manage_messages=True, embed_links=True)
+    @commands.bot_has_permissions(manage_messages=True, embed_links=True, read_message_history=True)
     @commands.has_permissions(manage_messages=True)
     async def cancella(self, ctx, amount: int):
         if amount < 201:
@@ -19,7 +20,8 @@ class clear(commands.Cog):
             await ctx.send(embed=embed)
 
     @cancella.command(name='fino', aliases=['until'], description='cancella fino all ID del messaggio fornito')
-    @commands.bot_has_permissions(manage_messages=True, embed_links=True)
+    @commands.bot_has_permissions(manage_messages=True, embed_links=True, read_message_history=True)
+    @commands.cooldown(1, 1, BucketType.guild)
     @commands.has_permissions(manage_messages=True)
     async def until_subcommand(self, ctx, ID: discord.Message):
         try:

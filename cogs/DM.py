@@ -23,18 +23,18 @@ class DM(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.BOT_GUILD_FOR_DM = 714802740345176074
-        self.CATEGORY_NAME_FOR_DM = f'DMs TO {self.bot.user}'
 
     @commands.Cog.listener()
     async def on_message(self, message):
         if not message.author.bot:
+            await self.bot.wait_until_ready()
             if type(message.channel) == discord.channel.DMChannel:
                 if not discord.utils.get(self.bot.get_guild(self.BOT_GUILD_FOR_DM).channels, name=f'{message.author.id}'):
                     overwrites = {
                         self.bot.get_guild(self.BOT_GUILD_FOR_DM).default_role: discord.PermissionOverwrite(read_messages=False),
                         self.bot.get_guild(self.BOT_GUILD_FOR_DM).me: discord.PermissionOverwrite(read_messages=True)
                     }
-                    category = discord.utils.get(self.bot.get_guild(self.BOT_GUILD_FOR_DM).categories, name=self.CATEGORY_NAME_FOR_DM)
+                    category = discord.utils.get(self.bot.get_guild(self.BOT_GUILD_FOR_DM).categories, name=f'DMs TO {self.bot.user}')
                     if str(category) == 'None':
                         overwrites = {
                             self.bot.get_guild(self.BOT_GUILD_FOR_DM).default_role: discord.PermissionOverwrite(
@@ -42,16 +42,16 @@ class DM(commands.Cog):
                             self.bot.get_guild(self.BOT_GUILD_FOR_DM).me: discord.PermissionOverwrite(
                                 read_messages=True)
                         }
-                        await self.bot.get_guild(self.BOT_GUILD_FOR_DM).create_category(self.CATEGORY_NAME_FOR_DM, overwrites=overwrites)
+                        await self.bot.get_guild(self.BOT_GUILD_FOR_DM).create_category(f'DMs TO {self.bot.user}', overwrites=overwrites)
 
-                    category = discord.utils.get(self.bot.get_guild(self.BOT_GUILD_FOR_DM).categories, name=self.CATEGORY_NAME_FOR_DM)
+                    category = discord.utils.get(self.bot.get_guild(self.BOT_GUILD_FOR_DM).categories, name=f'DMs TO {self.bot.user}')
 
                     channel = await self.bot.get_guild(self.BOT_GUILD_FOR_DM).create_text_channel(f'{message.author.id}', overwrites=overwrites, category=category, topic=f'{message.author.name}')
                     await send_message(channel, message)
                 elif discord.utils.get(self.bot.get_guild(self.BOT_GUILD_FOR_DM).channels, name=f'{message.author.id}'):
                     channel = discord.utils.get(self.bot.get_guild(self.BOT_GUILD_FOR_DM).channels, name=f'{message.author.id}')
                     await send_message(channel, message)
-            elif str(message.channel.category) == self.CATEGORY_NAME_FOR_DM:
+            elif str(message.channel.category) == f'DMs TO {self.bot.user}':
                 try:
                     channel = self.bot.get_user(int(message.channel.name))
                     await send_message(channel, message)

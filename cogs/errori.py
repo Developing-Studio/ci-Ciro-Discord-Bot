@@ -7,7 +7,7 @@ class errori(commands.Cog):
 
     def __init__(self, bot):
         self.bot = bot
-        self.ignore = ('vol', 'tra', 'equalizer', 'appeal_reason')
+        self.ignore = ('vol', 'tra', 'equalizer', 'appeal_reason', 'amount', 'tempo')
 
     @commands.command(description='Effettua il check dei permessi del bot')
     @commands.bot_has_permissions(manage_messages=True, attach_files=True, embed_links=True)
