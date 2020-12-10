@@ -11,6 +11,7 @@ class clear(commands.Cog):
     @commands.group(aliases=['clear'], description='Cancella messaggi nella chat', invoke_without_command=True)
     @commands.bot_has_permissions(manage_messages=True, embed_links=True, read_message_history=True)
     @commands.has_permissions(manage_messages=True)
+    @commands.cooldown(1, 1, BucketType.guild)
     async def cancella(self, ctx, amount: int):
         if amount < 201:
             await ctx.channel.purge(limit=amount)

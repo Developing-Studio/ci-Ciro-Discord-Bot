@@ -51,9 +51,8 @@ class misc(commands.Cog):
                     await ctx.send('Questo comando non esiste!')
                     return
                 if str(raw_comando.aliases) != '[]':
-                    raw_comando.aliases = str(raw_comando.aliases).replace("[", "").replace("]", "").replace("'",
-                                                                                                             "`").replace(
-                        ",", " -")
+                    raw_comando.aliases = str(raw_comando.aliases).replace("[", "").replace("]", "").replace("'", "`")\
+                        .replace(",", " -")
                     await ctx.send(f"Alias : {raw_comando.aliases}\nDescrizione : {raw_comando.description}")
                 else:
                     await ctx.send(f"Descrizione : {raw_comando.description}")
@@ -77,7 +76,9 @@ class misc(commands.Cog):
                                 generale += f"Modulo : {x[:-3]}\n{value}"
                             except:
                                 pass
-                generale += f'```\n\nPer maggiori informazioni scrivi:\nhelp `nome comando`\n\nSTAI VISUALIZZANDO IL FORMATO SENZA EMBED!\nUSA IL COMANDO `{get_prefix_tx(self.bot, message=ctx.message)}setup` per maggiori info'
+                generale += f'```\n\nPer maggiori informazioni scrivi:\nhelp `nome comando`\n\nSTAI VISUALIZZANDO IL ' \
+                            f'FORMATO SENZA EMBED!\nUSA ' \
+                            f'IL COMANDO `{get_prefix_tx(self.bot, message=ctx.message)}setup` per maggiori info '
                 await ctx.send(generale)
             else:
                 raw_comando = self.bot.get_command(comando)
@@ -124,9 +125,11 @@ class misc(commands.Cog):
                         f"\nOnline su: `{platform.system()}`"
                         f"\nSono in: `{len(self.bot.guilds)}` server"
                         f"\nUtenti: `{len(self.bot.users)}`"
-                        f"\nInvitami nel tuo server: [clicca qui](https://discord.com/oauth2/authorize?client_id=714798417746067547&permissions=0&scope=bot)"
+                        f"\nInvitami nel tuo server: [clicca qui]("
+                        f"https://discord.com/oauth2/authorize?client_id=714798417746067547&permissions=0&scope=bot) "
                         f"\nEntra nel server di <@714798417746067547>: [clicca qui](https://discord.gg/Ck5rBtS)"
-                        f"\nPrivacy Policy: [clicca qui](https://github.com/ITKewai/Ciro-Discord-Bot/blob/master/privacy.md)**",
+                        f"\nPrivacy Policy: [clicca qui](https://github.com/ITKewai/Ciro-Discord-Bot/blob/master"
+                        f"/privacy.md)**",
             colour=discord.Colour.gold())
 
         await ctx.send(embed=emb)
@@ -202,10 +205,11 @@ class misc(commands.Cog):
 
     @commands.Cog.listener()
     async def on_message(self, message):
-        if len(message.mentions) == 1 and message.mentions[0].id == self.bot.user.id and len(message.content.split(" ")) == 1:
+        if len(message.mentions) == 1 and message.mentions[0].id == self.bot.user.id and \
+                len(message.content.split(" ")) == 1:
             if message.channel != discord.channel.DMChannel:
-                embed = discord.Embed(title=f"Il prefisso di questo server è:    {get_prefix_tx(self.bot, message=message)}",
-                                      colour=discord.Colour.red())
+                embed = discord.Embed(title=f"Il prefisso di questo server è:    "
+                                            f"{get_prefix_tx(self.bot, message=message)}", colour=discord.Colour.red())
                 await message.channel.send(embed=embed)
 
     @commands.command(aliases=['vote', 'voto'], description='Mostra il link per votare il bot')

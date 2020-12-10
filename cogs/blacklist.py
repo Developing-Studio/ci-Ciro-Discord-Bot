@@ -1,6 +1,30 @@
+from data.var import *
 import json
 import discord
 from discord.ext import commands
+
+
+async def get_appeal_channel(bot):
+    await bot.wait_until_ready()
+    if not discord.utils.get(bot.get_guild(ciro_guild).channels, name='appeal'):
+        overwrites = {
+            bot.get_guild(ciro_guild).default_role: discord.PermissionOverwrite(read_messages=False),
+            bot.get_guild(ciro_guild).me: discord.PermissionOverwrite(read_messages=True)
+        }
+        category = discord.utils.get(bot.get_guild(ciro_guild).categories, name=f'APPEALs TO {bot.user}')
+        if str(category) == 'None':
+            overwrites = {
+                bot.get_guild(ciro_guild).default_role: discord.PermissionOverwrite(read_messages=False),
+                bot.get_guild(ciro_guild).me: discord.PermissionOverwrite(read_messages=True)
+            }
+            await bot.get_guild(ciro_guild).create_category(f'APPEALs TO {bot.user}', overwrites=overwrites)
+
+        category = discord.utils.get(bot.get_guild(ciro_guild).categories, name=f'APPEALs TO {bot.user}')
+
+        return await bot.get_guild(ciro_guild).create_text_channel('appeal', overwrites=overwrites,
+                                                                   category=category)
+    elif discord.utils.get(bot.get_guild(ciro_guild).channels, name='appeal'):
+        return discord.utils.get(bot.get_guild(ciro_guild).channels, name='appeal')
 
 
 class blacklist(commands.Cog):
@@ -68,12 +92,12 @@ class blacklist(commands.Cog):
     async def appeal(self, ctx, *, appeal_reason):
         if ctx.author.id in self.bot.blacklisted:
             await ctx.send(f"La tua richiesta è stata inviata al proprietario del bot!")
-            channel = self.bot.get_channel(747131037397811230)
-            embed = discord.Embed(title="", description="New appeal", color=discord.Color.dark_green())
-            embed.set_author(name="Ciro appeal system")
-            embed.add_field(name=f"Appeal:", value=f"{appeal_reason}", inline=False)
-            await channel.send(embed=embed)
-            await channel.send(f"This appeal is by {ctx.author.mention}")
+            await self.bot.wait_until_ready()
+            embed = discord.Embed(title="", description=f"Contestazione blacklist effettuata da `{ctx.author}` - "
+                                                        f"`{ctx.author.id}`", color=discord.Color.dark_green())
+            embed.add_field(name=f"Motivo:", value=f"{appeal_reason}", inline=False)
+            await (await get_appeal_channel(self.bot)).send(embed=embed)
+
         else:
             return await ctx.send(f"{ctx.author.mention}, non sei nella blacklist")
 
@@ -88,7 +112,7 @@ class blacklist(commands.Cog):
             embed = discord.Embed(title=f"Riprova tra {int(error.retry_after)} sec", colour=discord.Colour.red())
             await ctx.send(embed=embed)
 
-    @commands.command()
+    @commands.command(hidden=True, description='`aggiungi` oppure `rimuovi + motivo`')
     @commands.is_owner()
     async def blacklist(self, ctx, action: str = None, member=None, content=None):
         if not action:
@@ -97,7 +121,7 @@ class blacklist(commands.Cog):
             for x in lista:
                 user = self.bot.get_user(x)
                 if user:
-                    f += f'{user}\n'
+                    f += f'{user} -- {user.id}\n'
                 else:
                     f += f'{x}\n'
             await ctx.send(f)
@@ -106,26 +130,59 @@ class blacklist(commands.Cog):
             try:
                 member = member.replace('<@!', '').replace('>', '')
                 memberx = self.bot.get_user(int(member))
-                ID = memberx.id
+                _id = memberx.id
             except:
                 if len(member) == 18:
-                    ID = int(member)
+                    _id = int(member)
                 else:
-                    return await ctx.send('Invalid ID')
+                    return await ctx.send('ID non valido!')
 
             if action in ['aggiungi', 'add']:
-                await ctx.send(await self.q_blacklist(action='add', ID=ID, bot=self.bot))
-            if action in ['rimuovi', 'remove']:
-                lmao = await self.q_blacklist(action='remove', ID=ID, bot=self.bot)
+                await ctx.send(await self.q_blacklist(action='add', ID=_id, bot=self.bot))
+            elif action in ['rimuovi', 'remove']:
+                lmao = await self.q_blacklist(action='remove', ID=_id, bot=self.bot)
                 await ctx.send(lmao)
                 try:
                     if lmao == 'Rimosso con successo' and content:
                         embed = discord.Embed(title=content, colour=discord.Colour.red())
-                        await self.bot.get_user(ID).send(embed=embed)
+                        await self.bot.get_user(_id).send(embed=embed)
                 except:
                     pass
+            elif action in ['gain', 'prendi', 'get']:
+                if not discord.utils.get(self.bot.get_guild(ciro_guild).channels, name=f'{_id}'):
+                    overwrites = {
+                        self.bot.get_guild(ciro_guild).default_role: discord.PermissionOverwrite(read_messages=False),
+                        self.bot.get_guild(ciro_guild).me: discord.PermissionOverwrite(read_messages=True)
+                    }
 
+                    category = discord.utils.get(self.bot.get_guild(ciro_guild).categories,
+                                                 name=f'DMs TO {self.bot.user}')
+                    if str(category) == 'None':
+                        overwrites = {
+                            self.bot.get_guild(ciro_guild).default_role: discord.PermissionOverwrite(
+                                read_messages=False),
+                            self.bot.get_guild(ciro_guild).me: discord.PermissionOverwrite(read_messages=True)
+                        }
+                        await self.bot.get_guild(ciro_guild).create_category(f'DMs TO {self.bot.user}',
+                                                                             overwrites=overwrites)
 
+                    category = discord.utils.get(self.bot.get_guild(ciro_guild).categories,
+                                                 name=f'DMs TO {self.bot.user}')
+                    try:
+                        member = self.self.bot.get_user(_id)
+                        x = await self.bot.get_guild(ciro_guild).create_text_channel(f'{member.id}',
+                                                                                     overwrites=overwrites,
+                                                                                     category=category,
+                                                                                     topic=f'{member.name}')
+                    except:
+                        x = await self.bot.get_guild(ciro_guild).create_text_channel(f'{_id}',
+                                                                                     overwrites=overwrites,
+                                                                                     category=category,
+                                                                                     topic=f'X')
+                    return await ctx.send(x.mention)
+                elif discord.utils.get(self.bot.get_guild(ciro_guild).channels, name=f'{_id}'):
+                    x = discord.utils.get(self.bot.get_guild(ciro_guild).channels, name=f'{_id}')
+                    return await ctx.send(x.mention)
 
 
 def setup(bot):

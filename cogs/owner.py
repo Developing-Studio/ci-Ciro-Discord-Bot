@@ -5,7 +5,6 @@ import io
 import textwrap
 import traceback
 from contextlib import redirect_stdout
-
 import aiohttp
 import asyncio
 import discord
@@ -282,8 +281,8 @@ class owner(commands.Cog):
         try:
             source_lines, _ = inspect.getsourcelines(cmd.callback)
         except (TypeError, OSError):
-            emb = discord.Embed(description=f"<:PepeKMS:719317573493194883> | Non riesco a prendere la sorgente di **{command}**.",
-                                colour=discord.Colour.red())
+            emb = discord.Embed(description=f"<:PepeKMS:719317573493194883> | Non riesco a"
+                                            f" prendere la sorgente di **{command}**.", colour=discord.Colour.red())
             return await ctx.send(embed=emb)
 
         source_lines_ = ''.join(source_lines)

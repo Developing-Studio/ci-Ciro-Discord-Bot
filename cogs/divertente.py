@@ -9,7 +9,10 @@ try:
     from cogs.LOG_DB import sql_Error
 except:
     pass
-from data import skyshit24
+try:
+    from data import skyshit24
+except:
+    pass
 from gtts import gTTS
 import re
 from io import BytesIO
@@ -132,7 +135,10 @@ class divertente(commands.Cog):
 
     @commands.command(description='Manda informazioni dal mondo')
     async def news(self, ctx):
-        text = skyshit24.news_picker()
+        try:
+            text = skyshit24.news_picker()
+        except:
+            text = 'Chiedi il permesso per generare il file contenente le frasi'
         embed = discord.Embed(title=text, colour=discord.Colour.blue())
         embed.set_footer(text="https://t.me/skyshit24")
         await ctx.send(embed=embed)
@@ -145,7 +151,8 @@ class divertente(commands.Cog):
             message = re.sub("<(?P<animated>a?):(?P<name>[a-zA-Z0-9_]{2,32}):(?P<id>[0-9]{18,22})>", "", message)
             message = message.replace('@', '')
             try:
-                headers = {'user-agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/59.0.3071.115 Safari/537.36'}
+                headers = {'user-agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_5) AppleWebKit/537.36 (KHTML, '
+                                         'like Gecko) Chrome/59.0.3071.115 Safari/537.36'}
                 async with aiohttp.ClientSession(headers=headers) as session:
                     url = "https://us-central1-sunlit-context-217400.cloudfunctions.net/streamlabs-tts"
                     data = {'text': message, 'voice': 'Giorgio'}
@@ -177,7 +184,8 @@ class divertente(commands.Cog):
                     f = TemporaryFile()
                     tts.write_to_fp(f)
                     f.seek(0)  # file object
-                    await ctx.send('Voce di giorgio attualmente non disponible', file=discord.File(BytesIO(f.read()), filename='output.mp3'))
+                    await ctx.send('Voce di giorgio attualmente non disponible',
+                                   file=discord.File(BytesIO(f.read()), filename='output.mp3'))
                     f.close()
                 except:
                     await ctx.send('Cè qualcosa che non va...')

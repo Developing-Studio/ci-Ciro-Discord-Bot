@@ -9,3 +9,4 @@ Pillow
 jishaku
 dblpy
 pydub
+pytz

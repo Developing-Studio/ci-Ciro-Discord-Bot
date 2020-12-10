@@ -17,6 +17,9 @@ Put an `application.yml` file in your working directory. [Example](https://githu
 
 Run the server before start the bot--->
 
+## Windows requirements
+* FFmpeg (added to Windows Variables-> Path)
+
 ## Authors
 * [**IT | Kewai**](https://https://github.com/ITKewai) - *Initial work* 
 
