@@ -11,7 +11,7 @@ class clear(commands.Cog):
     @commands.group(aliases=['clear'], description='Cancella messaggi nella chat', invoke_without_command=True)
     @commands.bot_has_permissions(manage_messages=True, embed_links=True, read_message_history=True)
     @commands.has_permissions(manage_messages=True)
-    @commands.cooldown(1, 1, BucketType.guild)
+    @commands.max_concurrency(1, per=BucketType.guild, wait=False)
     async def cancella(self, ctx, amount: int):
         if amount < 201:
             await ctx.channel.purge(limit=amount)
@@ -22,7 +22,7 @@ class clear(commands.Cog):
 
     @cancella.command(name='fino', aliases=['until'], description='cancella fino all ID del messaggio fornito')
     @commands.bot_has_permissions(manage_messages=True, embed_links=True, read_message_history=True)
-    @commands.cooldown(1, 1, BucketType.guild)
+    @commands.max_concurrency(1, per=BucketType.guild, wait=False)
     @commands.has_permissions(manage_messages=True)
     async def until_subcommand(self, ctx, ID: discord.Message):
         try:

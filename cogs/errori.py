@@ -1,6 +1,7 @@
 import json
 import discord
 from discord.ext import commands
+from data.var import *
 
 
 class errori(commands.Cog):
@@ -102,7 +103,8 @@ class errori(commands.Cog):
             if str(error) == 'blacklist':
                 embed = discord.Embed(title="", colour=discord.Colour.red())
                 embed.add_field(name="⚠ | SEI FINITO NELLA BLACKLIST:",
-                                value='```Tutti i comandi per te sono disabiliati.\nSe ci sei finito per errore usa il comando:\nappeal```',
+                                value='```Tutti i comandi per te sono disabiliati.\nSe ci sei finito per errore usa '
+                                      'il comando:\nappeal```',
                                 inline=False)
                 await ctx.send(embed=embed)
             else:
@@ -128,9 +130,15 @@ class errori(commands.Cog):
                 await ctx.send(embed=embed)
             except:
                 await ctx.send(f"""Membro {error.args[0].split('"')[1]} non trovato""")
+        elif isinstance(error, commands.MaxConcurrencyReached):
+            await ctx.message.add_reaction('❌')
+            await ctx.message.add_reaction('⏲')
+            embed = discord.Embed(title="", colour=discord.Colour.red())
+            embed.add_field(name="⚠ | Cooldown:", value=f'```Attendi che il comando precendente finisca```', inline=False)
+            await ctx.send(embed=embed)
         else:
             if not any(l in str(error) for l in self.ignore):
-                await self.bot.get_channel(714813858530721862).send(f"`{ctx.guild.id}` > {error}")
+                await self.bot.get_channel(ciro_errori).send(f"`{ctx.guild.id}` + `{ctx.command}`> {error}")
 
 
 def setup(bot):
