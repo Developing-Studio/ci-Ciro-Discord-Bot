@@ -357,13 +357,17 @@ class misc(commands.Cog):
         else:
             await ctx.send('Non ho trovato nessun membro per quel nome. Ricorda che la ricerca è case-sensitive')
 
-    @commands.command(aliases=["nickname"], description='Mostra quali membri hanno quel ruolo (case-sensitive)')
+    @commands.command(aliases=["nickname"], description='Mostra quali membri hanno quel nickname (case-sensitive)')
     async def nick(self, ctx, *, arg=None):
         paginator = commands.Paginator()
-        r = [str(x) for x in ctx.guild.members if arg in str(x)]
+        r = []
+        for x in ctx.guild.members:
+            if x.nick:
+                if arg in str(x):
+                    r.append(x.nick)
         res = ''
         if str(r) != '[]':
-            res += f'Membri con il nome "{arg}" {len(r)}:\n'
+            res += f'Membri con il nickname "{arg}" {len(r)}:\n'
             for a in r:
                 res += f"   {a}\n"
         # print(len(res))
@@ -392,7 +396,7 @@ class misc(commands.Cog):
         member = member or ctx.author
 
         error = discord.Embed(description=f"⚠  | Non rilevo nessuna attività di  **Spotify**, assicurati "
-                                          f"che sia collegato al tuo account discord",colour=discord.Colour.red())
+                                          f"che sia collegato al tuo account discord", colour=discord.Colour.red())
 
         if not member.activity:
             return await ctx.send(embed=error)
@@ -424,6 +428,7 @@ class misc(commands.Cog):
                     return await ctx.send(embed=emb)
 
         await ctx.send(embed=error)
+
 
 def setup(bot):
     bot.add_cog(misc(bot))
