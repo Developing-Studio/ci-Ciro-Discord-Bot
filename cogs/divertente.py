@@ -5,6 +5,7 @@ import discord
 from discord.ext import commands, tasks
 from pydub import AudioSegment
 from Ciro import get_prefix_tx
+
 try:
     from cogs.LOG_DB import sql_Error
 except:
@@ -92,7 +93,6 @@ def generate_blank_char():
 
 
 def get_params(threshold, size):
-
     width, sep, height = size.partition("x")
 
     width = int(width.strip())
@@ -101,8 +101,7 @@ def get_params(threshold, size):
     return threshold, width, height
 
 
-def convert_image_to_ascii(image, image_proc, per_cut, width, height, char_width, char_height, threshold,
-                           inverse):
+def convert_image_to_ascii(image, image_proc, per_cut, width, height, char_width, char_height, threshold, inverse):
     width = width
     height = height
     char_width = char_width
@@ -169,7 +168,8 @@ class divertente(commands.Cog):
                         audio = AudioSegment.from_file_using_temporary_files(locashion, format="ogg")
 
                         file = audio.export(f"./{file_name}.mp3", format="mp3")
-                        await ctx.send('Voce di Giorgio', file=discord.File(BytesIO(file.read()), filename='output.mp3'))
+                        await ctx.reply('Voce di Giorgio',
+                                        file=discord.File(BytesIO(file.read()), filename='output.mp3'))
                         file.close()
                         os.remove(f'./{file_name}.mp3')
 
@@ -184,8 +184,8 @@ class divertente(commands.Cog):
                     f = TemporaryFile()
                     tts.write_to_fp(f)
                     f.seek(0)  # file object
-                    await ctx.send('Voce di giorgio attualmente non disponible',
-                                   file=discord.File(BytesIO(f.read()), filename='output.mp3'))
+                    await ctx.reply('Voce di giorgio attualmente non disponible',
+                                    file=discord.File(BytesIO(f.read()), filename='output.mp3'))
                     f.close()
                 except:
                     await ctx.send('Cè qualcosa che non va...')

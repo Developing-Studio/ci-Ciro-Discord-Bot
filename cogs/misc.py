@@ -51,7 +51,7 @@ class misc(commands.Cog):
                     await ctx.send('Questo comando non esiste!')
                     return
                 if str(raw_comando.aliases) != '[]':
-                    raw_comando.aliases = str(raw_comando.aliases).replace("[", "").replace("]", "").replace("'", "`")\
+                    raw_comando.aliases = str(raw_comando.aliases).replace("[", "").replace("]", "").replace("'", "`") \
                         .replace(",", " -")
                     await ctx.send(f"Alias : {raw_comando.aliases}\nDescrizione : {raw_comando.description}")
                 else:
@@ -231,7 +231,7 @@ class misc(commands.Cog):
     @commands.command(description='Mostra se un utente è dal cellulare')
     async def mobile(self, ctx, member: discord.Member = None):
 
-        member = member or ctx.author 
+        member = member or ctx.author
 
         if member.is_on_mobile():
             await ctx.send('Sì')
@@ -332,11 +332,11 @@ class misc(commands.Cog):
         paginator = commands.Paginator()
         r = [str(x) for x in ctx.guild.members if arg in str(x)]
         res = ''
-        if str(r) != '[]':
+        if str(r) != '[]' and arg:
             res += f'Membri con il nome "{arg}" {len(r)}:\n'
             for a in r:
                 res += f"   {a}\n"
-        # print(len(res))
+            # print(len(res))
             if len(res) >= 2000:
                 data = bytes(res, 'utf-8')
                 async with aiohttp.ClientSession() as cs:
@@ -366,11 +366,11 @@ class misc(commands.Cog):
                 if arg in str(x):
                     r.append(x.nick)
         res = ''
-        if str(r) != '[]':
+        if str(r) != '[]' and arg:
             res += f'Membri con il nickname "{arg}" {len(r)}:\n'
             for a in r:
                 res += f"   {a}\n"
-        # print(len(res))
+            # print(len(res))
             if len(res) >= 2000:
                 data = bytes(res, 'utf-8')
                 async with aiohttp.ClientSession() as cs:

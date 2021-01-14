@@ -83,12 +83,7 @@ class ripeti(commands.Cog):
 
     @inoltra.error
     async def inoltra_error(self, ctx, error):
-        if isinstance(error, commands.errors.BadArgument):
-            embed = discord.Embed(title="", colour=discord.Colour.red())
-            embed.add_field(name="Canale non trovato",
-                            value=f'```Sei sicuro che il canale esista?\ninoltra #canale```', inline=False)
-            await ctx.send(embed=embed)
-        elif isinstance(error, commands.errors.CommandInvokeError):
+        if isinstance(error, commands.errors.CommandInvokeError):
             message = await ctx.send(f'{error}')
             await message.delete(delay=5)
         elif isinstance(error, commands.errors.MissingRequiredArgument):

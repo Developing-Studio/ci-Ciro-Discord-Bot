@@ -136,6 +136,17 @@ class errori(commands.Cog):
             embed = discord.Embed(title="", colour=discord.Colour.red())
             embed.add_field(name="⚠ | Cooldown:", value=f'```Attendi che il comando precendente finisca```', inline=False)
             await ctx.send(embed=embed)
+        elif isinstance(error, commands.errors.ChannelNotFound):
+            if str(ctx.command) == 'inoltra':
+                try:
+                    embed = discord.Embed(title="", colour=discord.Colour.red())
+                    embed.add_field(name="Canale non trovato",
+                                    value=f'```Sei sicuro che il canale esista?\ninoltra #canale```', inline=False)
+                    await ctx.send(embed=embed)
+                except:
+                    await ctx.send(f'```Sei sicuro che il canale esista?\ninoltra #canale```')
+            else:
+                await self.bot.get_channel(ciro_errori).send(f"`{ctx.guild.id}` + `{ctx.command}`> {error}")
         else:
             if not any(l in str(error) for l in self.ignore):
                 await self.bot.get_channel(ciro_errori).send(f"`{ctx.guild.id}` + `{ctx.command}`> {error}")
